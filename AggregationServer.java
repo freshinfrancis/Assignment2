@@ -1,8 +1,10 @@
 package com.weather.app;
 
-import java.net.*;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 import java.io.*;
-import java.nio.file.*;
+import java.net.*;
 
 public class AggregationServer {
     private static final int PORT = 8080;
@@ -13,9 +15,6 @@ public class AggregationServer {
         ServerSocket serverSocket = new ServerSocket(PORT);
         System.out.println("Server is running on port " + PORT);
 
-        // Ensure recovery from crashes by checking if temp file exists
-        recoverIfCrashed();
-
         while (true) {
             try (Socket clientSocket = serverSocket.accept();
                  BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
@@ -23,24 +22,22 @@ public class AggregationServer {
 
                 String requestType = in.readLine(); // First line is request type
                 System.out.println(requestType);
-                
+
                 String[] requestParts = requestType.split(" ", 2);  // Split into method and path
-                
                 String method = "";
                 String path = "";
-                
+
                 if (requestParts.length >= 2) {
                     method = requestParts[0];  // First part is the HTTP method
                     path = requestParts[1];    // Second part is the requested path
                 }
-                
+
                 if ("PUT".equals(method)) {
                     handlePutRequest(in, out);
                 } else if ("GET".equals(method)) {
                     handleGetRequest(out);
                 } else {
                     out.println("HTTP/1.1 400 Bad Request");
-                    out.println("Invalid request type");
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -48,7 +45,6 @@ public class AggregationServer {
         }
     }
 
-    // Handle PUT requests with intermediate storage and validation
     private static void handlePutRequest(BufferedReader in, PrintWriter out) throws IOException {
         StringBuilder headers = new StringBuilder();
         String line;
@@ -57,57 +53,93 @@ public class AggregationServer {
         // Read headers
         while ((line = in.readLine()) != null && !line.isEmpty()) {
             headers.append(line).append("\n");
-            
+
             // Check for Content-Length header
             if (line.startsWith("Content-Length:")) {
                 contentLength = Integer.parseInt(line.substring("Content-Length:".length()).trim());
             }
         }
 
+        // No content
+        if (contentLength == 0) {
+            out.println("HTTP/1.1 204 No Content");
+            return;
+        }
+
+        // Read the JSON data from the body based on Content-Length
         char[] bodyData = new char[contentLength];
-        in.read(bodyData, 0, contentLength);
+        in.read(bodyData, 0, contentLength);  // Read exactly contentLength characters
         String jsonData = new String(bodyData);
 
-        // Validate the data before saving
-        if (validateData(jsonData)) {
-            // Save to a temp file first (intermediate storage)
-            saveDataToTempFile(jsonData);
+        
+        if (!isValidJson(jsonData)) {
+            System.out.println("Invalid JSON received: " + jsonData);  // Debug output
+            out.println("HTTP/1.1 500 Internal Server Error");
+            return;
+        }
 
-            // If successful, move the temp file to the actual data file
-            Files.move(Paths.get(TEMP_FILE), Paths.get(DATA_FILE), StandardCopyOption.REPLACE_EXISTING);
-
-            // Send response to the ContentServer
-            out.println("HTTP/1.1 200 OK");
-            out.println("Data updated successfully.");
-        } else {
-            out.println("HTTP/1.1 400 Bad Request");
-            out.println("Invalid data format.");
+        // Handle file write safely with a temporary file
+        boolean isNewFile = !new File(DATA_FILE).exists();
+        try {
+            writeToTempFile(jsonData);
+            if (commitTempFile()) {
+                if (isNewFile) {
+                    out.println("HTTP/1.1 201 Created");
+                } else {
+                    out.println("HTTP/1.1 200 OK");
+                }
+            } else {
+                out.println("HTTP/1.1 500 Internal Server Error");
+            }
+        } catch (IOException e) {
+            System.out.println("File write error: " + e.getMessage());  // Debug output
+            out.println("HTTP/1.1 500 Internal Server Error");
         }
     }
 
-    // Handle GET requests by returning data as JSON
-    private static void handleGetRequest(PrintWriter out) throws IOException {
-        String data = readDataFromFile();
-
-        // Convert the text data to JSON format
-        String jsonData = convertDataToJson(data);
-
-        // Send the JSON data to the client
-        out.println("HTTP/1.1 200 OK");
-        out.println("Content-Type: application/json");
-        out.println("Content-Length: " + jsonData.length());
-        out.println();
-        out.println(jsonData);
+    private static boolean isValidJson(String jsonData) {
+        try {
+            JsonElement jsonElement = JsonParser.parseString(jsonData);  // Try parsing the JSON
+            return jsonElement.isJsonObject();  // Check if it's a valid JSON object
+        } catch (JsonSyntaxException e) {
+            return false;  // If it's invalid, return false
+        }
     }
 
-    // Save data to a temporary file before committing to the main file
-    private static void saveDataToTempFile(String data) throws IOException {
+    private static void handleGetRequest(PrintWriter out) throws IOException {
+        String data = readDataFromFile();
+        out.println("HTTP/1.1 200 OK");
+        out.println();
+        out.println(data);
+    }
+
+    private static void writeToTempFile(String data) throws IOException {
         try (FileWriter fileWriter = new FileWriter(TEMP_FILE)) {
             fileWriter.write(data);
         }
     }
 
-    // Read data from the permanent file
+    private static boolean commitTempFile() throws IOException {
+        File tempFile = new File(TEMP_FILE);
+        File finalFile = new File(DATA_FILE);
+            
+            try (FileReader fileReader = new FileReader(tempFile);
+                 FileWriter fileWriter = new FileWriter(finalFile)) {
+                 
+                char[] buffer = new char[1024];
+                int read;
+                while ((read = fileReader.read(buffer)) != -1) {
+                    fileWriter.write(buffer, 0, read);
+                }
+                return true;
+            } catch (IOException e) {
+                System.out.println("Error while copying file: " + e.getMessage());
+                return false;
+            } finally {
+                tempFile.delete();  // Ensure temp file is deleted
+            }
+    }
+
     private static String readDataFromFile() throws IOException {
         try (BufferedReader fileReader = new BufferedReader(new FileReader(DATA_FILE))) {
             StringBuilder data = new StringBuilder();
@@ -117,26 +149,5 @@ public class AggregationServer {
             }
             return data.toString();
         }
-    }
-
-    // Move temp file to main file if it exists
-    private static void recoverIfCrashed() throws IOException {
-        if (Files.exists(Paths.get(TEMP_FILE))) {
-            // Move temp file to main data file
-            Files.move(Paths.get(TEMP_FILE), Paths.get(DATA_FILE), StandardCopyOption.REPLACE_EXISTING);
-            System.out.println("Recovered from crash, restored data.");
-        }
-    }
-
-    // Validate the incoming data
-    private static boolean validateData(String data) {
-        // Check if it contains required fields (e.g., "id")
-        return data.contains("\"id\"");
-    }
-
-    // Convert the plain data to JSON
-    private static String convertDataToJson(String data) {
-        // Assume the data is already JSON-like and return as is
-        return data;
     }
 }
