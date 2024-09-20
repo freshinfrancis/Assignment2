@@ -11,3 +11,5 @@ Distributed Systems Assignment 2
 - Modified the Aggregation Server and created a intermediate storage temporary file so that the Server can withstand crashes. The data is stored in temp file and after validation is sent to the permanent data file.
 
 - Next, I modified the Aggregation Server Code to include the success and failure codes while execution
+
+- Next, I modified the Aggregation Server Code to have default port as 4567 and also have the option to put port no in command line argument
