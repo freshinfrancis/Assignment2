@@ -7,13 +7,24 @@ import java.io.*;
 import java.net.*;
 
 public class AggregationServer {
-    private static final int PORT = 8080;
+    private static final int DEFAULT_PORT = 4567;
     private static final String DATA_FILE = "weatherData.json";
     private static final String TEMP_FILE = "weatherData.tmp";
 
     public static void main(String[] args) throws IOException {
-        ServerSocket serverSocket = new ServerSocket(PORT);
-        System.out.println("Server is running on port " + PORT);
+        int port = DEFAULT_PORT; // Set the default port
+
+        // Check if a port number is passed as a command-line argument
+        if (args.length > 0) {
+            try {
+                port = Integer.parseInt(args[0]); // Parse the port number from the argument
+            } catch (NumberFormatException e) {
+                System.err.println("Invalid port number. Using default port: " + DEFAULT_PORT);
+            }
+        }
+
+        ServerSocket serverSocket = new ServerSocket(port);
+        System.out.println("Server is running on port " + port);
 
         while (true) {
             try (Socket clientSocket = serverSocket.accept();
@@ -71,7 +82,6 @@ public class AggregationServer {
         in.read(bodyData, 0, contentLength);  // Read exactly contentLength characters
         String jsonData = new String(bodyData);
 
-        
         if (!isValidJson(jsonData)) {
             System.out.println("Invalid JSON received: " + jsonData);  // Debug output
             out.println("HTTP/1.1 500 Internal Server Error");
@@ -122,22 +132,22 @@ public class AggregationServer {
     private static boolean commitTempFile() throws IOException {
         File tempFile = new File(TEMP_FILE);
         File finalFile = new File(DATA_FILE);
-            
-            try (FileReader fileReader = new FileReader(tempFile);
-                 FileWriter fileWriter = new FileWriter(finalFile)) {
-                 
-                char[] buffer = new char[1024];
-                int read;
-                while ((read = fileReader.read(buffer)) != -1) {
-                    fileWriter.write(buffer, 0, read);
-                }
-                return true;
-            } catch (IOException e) {
-                System.out.println("Error while copying file: " + e.getMessage());
-                return false;
-            } finally {
-                tempFile.delete();  // Ensure temp file is deleted
+
+        try (FileReader fileReader = new FileReader(tempFile);
+             FileWriter fileWriter = new FileWriter(finalFile)) {
+
+            char[] buffer = new char[1024];
+            int read;
+            while ((read = fileReader.read(buffer)) != -1) {
+                fileWriter.write(buffer, 0, read);
             }
+            return true;
+        } catch (IOException e) {
+            System.out.println("Error while copying file: " + e.getMessage());
+            return false;
+        } finally {
+            tempFile.delete();  // Ensure temp file is deleted
+        }
     }
 
     private static String readDataFromFile() throws IOException {
