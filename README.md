@@ -7,3 +7,5 @@ Distributed Systems Assignment 2
 - In the next step, tried to upload data from the default json file from content server to aggregation server.
 
 - Next, I modified the content server code to print the put message as requested. Modified the aggregation server to read both the header and json data and save in the handlePUT request function.
+
+- Modified the Aggregation Server and created a intermediate storage temporary file so that the Server can withstand crashes. The data is stored in temp file and after validation is sent to the permanent data file.
