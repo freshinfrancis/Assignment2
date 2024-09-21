@@ -15,3 +15,5 @@ Distributed Systems Assignment 2
 - Next, I modified the Aggregation Server Code to have default port as 4567 and also have the option to put port no in command line argument
 
 - Aggregation server has been designed to stay current and will remove any items in the JSON that have come from content servers which it has not communicated with for 30 seconds. The server takes the file in hashmap along with data and timestamp to create weather data and the data is transformed again to json format when get request is called.
+
+- GETClient code modified to enable using custom port no while passing argument on command line. The code is also now able to strip the json format of the data sent from aggregation server display in plain txt format.
