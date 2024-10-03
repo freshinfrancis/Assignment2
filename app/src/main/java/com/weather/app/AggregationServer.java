@@ -1,30 +1,94 @@
-
+// File: AggregationServer.java
 package com.weather.app;
 
+import com.google.gson.*;
 import java.io.*;
 import java.net.*;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.*;
 
 public class AggregationServer {
-    private static final int SERVER_PORT = 4567;
-    private static final int MAX_WEATHER_UPDATES = 20;
-    private static ConcurrentHashMap<String, WeatherData> weatherDataMap = new ConcurrentHashMap<>();
-    private static ConcurrentHashMap<String, Long> contentServerTimestamps = new ConcurrentHashMap<>();
-    private static LamportClock lamportClock = new LamportClock();
-    private static ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private static final int DEFAULT_PORT = 4567;
+    private static final String DATA_FILE = "weatherData.json";
+    private static final String TEMP_FILE = "weatherData.tmp";
+    private static final long EXPIRATION_TIME_MILLIS = 30_000; // 30 seconds
+    public static final LamportClock lamportClock = new LamportClock();
 
-    public static void main(String[] args) {
-        try {
-            ServerSocket serverSocket = new ServerSocket(SERVER_PORT);
-            System.out.println("Aggregation Server started on port " + SERVER_PORT);
+    // Data structures to store weather data and timestamps of content servers
+    public static final Map<String, JsonObject> weatherData = new ConcurrentHashMap<>();
+    public static final Map<String, Long> serverTimestamps = new ConcurrentHashMap<>();
 
-            // Schedule task to remove expired data
-            scheduler.scheduleAtFixedRate(() -> removeExpiredData(), 0, 5, TimeUnit.SECONDS);
+    public static void main(String[] args) throws IOException {
+        int port = DEFAULT_PORT;
+
+        // Check if a port number is passed as a command-line argument
+        if (args.length > 0) {
+            try {
+                port = Integer.parseInt(args[0]);
+            } catch (NumberFormatException e) {
+                System.err.println("Invalid port number. Using default port: " + DEFAULT_PORT);
+            }
+        }
+
+        // Periodically clean up expired entries
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+        scheduler.scheduleAtFixedRate(AggregationServer::cleanExpiredData, 10, 10, TimeUnit.SECONDS);
+
+        // Start server
+        try (ServerSocket serverSocket = new ServerSocket(port)) {
+            System.out.println("Server is running on port " + port);
 
             while (true) {
                 Socket clientSocket = serverSocket.accept();
-                new Thread(new ClientHandler(clientSocket)).start();
+
+                // Handle each client in a separate thread
+                new Thread(() -> handleClient(clientSocket)).start();
+            }
+        }
+    }
+
+    public static void handleClient(Socket clientSocket) {
+        try (Socket socket = clientSocket;
+             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+             PrintWriter out = new PrintWriter(socket.getOutputStream(), true)) {
+
+            String requestType = in.readLine();
+            System.out.println("Received request: " + requestType);
+
+            String[] requestParts = requestType.split(" ", 2);
+            String method = requestParts.length >= 1 ? requestParts[0] : "";
+            String path = requestParts.length >= 2 ? requestParts[1] : "";
+
+            // Read headers and extract Lamport-Clock
+            Map<String, String> headers = new HashMap<>();
+            String line;
+            int clientLamportClock = 0;
+
+            while ((line = in.readLine()) != null && !line.isEmpty()) {
+                int separatorIndex = line.indexOf(":");
+                if (separatorIndex != -1) {
+                    String headerName = line.substring(0, separatorIndex).trim();
+                    String headerValue = line.substring(separatorIndex + 1).trim();
+                    headers.put(headerName, headerValue);
+
+                    if (headerName.equalsIgnoreCase("Lamport-Clock")) {
+                        clientLamportClock = Integer.parseInt(headerValue);
+                    }
+                }
+            }
+
+            // Update server's Lamport clock
+            lamportClock.update(clientLamportClock);
+
+            if ("PUT".equalsIgnoreCase(method)) {
+                handlePutRequest(in, out, clientSocket.getInetAddress().toString(), headers);
+            } else if ("GET".equalsIgnoreCase(method)) {
+                handleGetRequest(out, headers);
+            } else {
+                out.println("HTTP/1.1 400 Bad Request");
+                out.println("Lamport-Clock: " + lamportClock.getClock());
+                out.println();
             }
 
         } catch (IOException e) {
@@ -32,138 +96,138 @@ public class AggregationServer {
         }
     }
 
-    // Remove data from content servers that haven't communicated in the last 30 seconds
-    private static void removeExpiredData() {
-        long currentTime = System.currentTimeMillis();
-        Iterator<Map.Entry<String, Long>> iterator = contentServerTimestamps.entrySet().iterator();
+    private static void handlePutRequest(BufferedReader in, PrintWriter out, String contentServer, Map<String, String> headers) throws IOException {
+        lamportClock.tick();
 
-        while (iterator.hasNext()) {
-            Map.Entry<String, Long> entry = iterator.next();
-            if (currentTime - entry.getValue() > 30000) {
-                String serverId = entry.getKey();
-                weatherDataMap.remove(serverId);
-                iterator.remove();
-                System.out.println("Removed data from content server: " + serverId);
+        int contentLength = Integer.parseInt(headers.getOrDefault("Content-Length", "0"));
+
+        // No content
+        if (contentLength == 0) {
+            out.println("HTTP/1.1 204 No Content");
+            out.println("Lamport-Clock: " + lamportClock.getClock());
+            out.println();
+            return;
+        }
+
+        char[] bodyData = new char[contentLength];
+        in.read(bodyData, 0, contentLength);
+        String jsonData = new String(bodyData);
+
+        if (!isValidJson(jsonData)) {
+            System.out.println("Invalid JSON received: " + jsonData);
+            out.println("HTTP/1.1 500 Internal Server Error");
+            out.println("Lamport-Clock: " + lamportClock.getClock());
+            out.println();
+            return;
+        }
+
+        // Add metadata (timestamp and content server origin)
+        JsonObject jsonObject = JsonParser.parseString(jsonData).getAsJsonObject();
+        jsonObject.addProperty("origin", contentServer);
+        jsonObject.addProperty("timestamp", Instant.now().toEpochMilli());
+
+        String entryId = jsonObject.get("id").getAsString();
+        weatherData.put(entryId, jsonObject);
+        serverTimestamps.put(contentServer, Instant.now().toEpochMilli());
+
+        boolean isNewFile = !new File(DATA_FILE).exists();
+        try {
+            writeToTempFile(weatherData);
+            if (commitTempFile()) {
+                if (isNewFile) {
+                    out.println("HTTP/1.1 201 Created");
+                } else {
+                    out.println("HTTP/1.1 200 OK");
+                }
+                out.println("Lamport-Clock: " + lamportClock.getClock());
+                out.println();
+            } else {
+                out.println("HTTP/1.1 500 Internal Server Error");
+                out.println("Lamport-Clock: " + lamportClock.getClock());
+                out.println();
             }
+        } catch (IOException e) {
+            System.out.println("File write error: " + e.getMessage());
+            out.println("HTTP/1.1 500 Internal Server Error");
+            out.println("Lamport-Clock: " + lamportClock.getClock());
+            out.println();
         }
     }
 
-    static class ClientHandler implements Runnable {
-        private Socket socket;
-
-        ClientHandler(Socket socket) {
-            this.socket = socket;
+    public static boolean isValidJson(String jsonData) {
+        try {
+            JsonElement jsonElement = JsonParser.parseString(jsonData);
+            return jsonElement.isJsonObject();
+        } catch (JsonSyntaxException e) {
+            return false;
         }
+    }
 
-        @Override
-        public void run() {
-            try {
-                BufferedReader in = new BufferedReader(
-                        new InputStreamReader(socket.getInputStream()));
-                BufferedWriter out = new BufferedWriter(
-                        new OutputStreamWriter(socket.getOutputStream()));
+    private static void handleGetRequest(PrintWriter out, Map<String, String> headers) throws IOException {
+        lamportClock.tick();
 
-                String requestLine = in.readLine();
-                if (requestLine == null) {
-                    socket.close();
-                    return;
-                }
+        String jsonResponse = convertToJson(weatherData);
 
-                String[] requestParts = requestLine.split(" ");
-                String method = requestParts[0];
-                String path = requestParts[1];
+        // Send headers
+        out.println("HTTP/1.1 200 OK");
+        out.println("Content-Type: application/json");
+        out.println("Content-Length: " + jsonResponse.length());
+        out.println("Lamport-Clock: " + lamportClock.getClock());
+        out.println();
 
-                // Read headers
-                Map<String, String> headers = new HashMap<>();
-                String line;
-                while (!(line = in.readLine()).isEmpty()) {
-                    String[] headerParts = line.split(": ");
-                    headers.put(headerParts[0], headerParts[1]);
-                }
+        // Send body
+        out.print(jsonResponse);
+        out.flush();
+    }
 
-                if (method.equals("GET")) {
-                    handleGet(out);
-                } else if (method.equals("PUT")) {
-                    handlePut(in, headers);
-                } else {
-                    sendResponse(out, 405, "Method Not Allowed", "");
-                }
-
-                socket.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+    private static void writeToTempFile(Map<String, JsonObject> data) throws IOException {
+        try (FileWriter fileWriter = new FileWriter(TEMP_FILE)) {
+            fileWriter.write(new Gson().toJson(data.values()));
         }
+    }
 
-        private void handleGet(BufferedWriter out) throws IOException {
-            synchronized (lamportClock) {
-                lamportClock.increment();
+    private static boolean commitTempFile() throws IOException {
+        File tempFile = new File(TEMP_FILE);
+        File finalFile = new File(DATA_FILE);
+
+        try (FileReader fileReader = new FileReader(tempFile);
+             FileWriter fileWriter = new FileWriter(finalFile)) {
+
+            char[] buffer = new char[1024];
+            int read;
+            while ((read = fileReader.read(buffer)) != -1) {
+                fileWriter.write(buffer, 0, read);
             }
-
-            // Aggregate weather data
-            Collection<WeatherData> weatherDataCollection = weatherDataMap.values();
-            List<WeatherData> weatherDataList = new ArrayList<>(weatherDataCollection);
-
-            // Sort by Lamport timestamp
-            weatherDataList.sort(Comparator.comparingLong(WeatherData::getLamportTimestamp));
-
-            // Keep only the most recent updates
-            if (weatherDataList.size() > MAX_WEATHER_UPDATES) {
-                weatherDataList = weatherDataList.subList(
-                        weatherDataList.size() - MAX_WEATHER_UPDATES, weatherDataList.size());
-            }
-
-            // Build JSON response
-            StringBuilder jsonResponse = new StringBuilder();
-            jsonResponse.append("[");
-            for (int i = 0; i < weatherDataList.size(); i++) {
-                jsonResponse.append(weatherDataList.get(i).toJson());
-                if (i < weatherDataList.size() - 1) {
-                    jsonResponse.append(",");
-                }
-            }
-            jsonResponse.append("]");
-
-            sendResponse(out, 200, "OK", jsonResponse.toString());
+            return true;
+        } catch (IOException e) {
+            System.out.println("Error while copying file: " + e.getMessage());
+            return false;
+        } finally {
+            tempFile.delete();
         }
+    }
 
-        private void handlePut(BufferedReader in, Map<String, String> headers) throws IOException {
-            int contentLength = Integer.parseInt(headers.getOrDefault("Content-Length", "0"));
-            char[] bodyChars = new char[contentLength];
-            in.read(bodyChars);
-            String requestBody = new String(bodyChars);
+    public static String convertToJson(Map<String, JsonObject> weatherData) {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        Collection<JsonObject> dataCollection = weatherData.values();
+        return gson.toJson(dataCollection);
+    }
 
-            // Parse Lamport timestamp
-            long receivedLamportTimestamp = Long.parseLong(
-                    headers.getOrDefault("Lamport-Timestamp", "0"));
-            synchronized (lamportClock) {
-                lamportClock.update(receivedLamportTimestamp);
-                lamportClock.increment();
+    public static void cleanExpiredData() {
+        long currentTime = Instant.now().toEpochMilli();
+        Iterator<Map.Entry<String, JsonObject>> iterator = weatherData.entrySet().iterator();
+
+        while (iterator.hasNext()) {
+            Map.Entry<String, JsonObject> entry = iterator.next();
+            JsonObject jsonObject = entry.getValue();
+            long timestamp = jsonObject.get("timestamp").getAsLong();
+            String origin = jsonObject.get("origin").getAsString();
+
+            if (currentTime - timestamp > EXPIRATION_TIME_MILLIS) {
+                System.out.println("Removing expired entry from " + origin);
+                iterator.remove();
+                serverTimestamps.remove(origin);
             }
-
-            // Parse JSON data
-            WeatherData weatherData = WeatherData.fromJson(requestBody);
-            weatherData.setLamportTimestamp(lamportClock.getTime());
-
-            // Update data maps
-            String serverId = weatherData.getId();
-            weatherDataMap.put(serverId, weatherData);
-            contentServerTimestamps.put(serverId, System.currentTimeMillis());
-
-            sendResponse(new BufferedWriter(
-                    new OutputStreamWriter(socket.getOutputStream())), 200, "OK", "");
-
-            System.out.println("Received PUT from Content Server ID: " + serverId);
-        }
-
-        private void sendResponse(BufferedWriter out, int statusCode, String statusText,
-                String body) throws IOException {
-            out.write("HTTP/1.1 " + statusCode + " " + statusText + "\r\n");
-            out.write("Content-Length: " + body.length() + "\r\n");
-            out.write("Content-Type: application/json\r\n");
-            out.write("\r\n");
-            out.write(body);
-            out.flush();
         }
     }
 }

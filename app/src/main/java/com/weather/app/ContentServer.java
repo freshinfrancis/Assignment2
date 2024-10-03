@@ -1,80 +1,136 @@
+// File: ContentServer.java
 package com.weather.app;
 
-import java.io.*;
 import java.net.*;
-import java.nio.file.*;
+import java.io.*;
 import java.util.*;
 
 public class ContentServer {
- private static LamportClock lamportClock = new LamportClock();
+    private static String serverAddress;
+    private static int serverPort;
+    private static String filePath;
+    private static final LamportClock lamportClock = new LamportClock();
 
- public static void main(String[] args) {
-     if (args.length < 2) {
-         System.out.println("Usage: java ContentServer <server_host>:<port> <data_file>");
-         return;
-     }
+    public static void main(String[] args) {
+        if (args.length != 2) {
+            System.out.println("Usage: java ContentServer <server-address:port> <file-path>");
+            return;
+        }
 
-     String serverAddress = args[0];
-     String dataFilePath = args[1];
+        String serverInfo = args[0];
+        filePath = args[1];
 
-     String[] serverParts = serverAddress.split(":");
-     String host = serverParts[0];
-     int port = Integer.parseInt(serverParts[1]);
+        // Split the server info into address and port
+        String[] serverParts = serverInfo.split(":");
+        if (serverParts.length != 2) {
+            System.out.println("Invalid server info format. Expected <server-address:port>");
+            return;
+        }
 
-     try {
-         // Read data from file
-         String data = new String(Files.readAllBytes(Paths.get(dataFilePath)));
-         Map<String, String> dataMap = parseDataFile(data);
+        serverAddress = serverParts[0];
+        try {
+            serverPort = Integer.parseInt(serverParts[1]);
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid port number: " + serverParts[1]);
+            return;
+        }
 
-         // Create WeatherData object
-         WeatherData weatherData = new WeatherData(dataMap);
-         synchronized (lamportClock) {
-             lamportClock.increment();
-             weatherData.setLamportTimestamp(lamportClock.getTime());
-         }
+        try {
+            String jsonData = convertFileToJson(filePath);
+            if (jsonData != null) {
+                sendDataToServer(jsonData);
+            } else {
+                System.out.println("Invalid data, not sending to server.");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-         // Convert to JSON
-         String jsonData = weatherData.toJson();
+    private static String convertFileToJson(String filePath) throws IOException {
+        Map<String, String> dataMap = new HashMap<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.trim().isEmpty()) continue;
 
-         // Send HTTP PUT request
-         Socket socket = new Socket(host, port);
-         BufferedWriter out = new BufferedWriter(
-                 new OutputStreamWriter(socket.getOutputStream()));
-         BufferedReader in = new BufferedReader(
-                 new InputStreamReader(socket.getInputStream()));
+                String[] parts = line.split(":", 2);
+                if (parts.length != 2) continue;
 
-         out.write("PUT /weather HTTP/1.1\r\n");
-         out.write("Host: " + host + "\r\n");
-         out.write("Content-Type: application/json\r\n");
-         out.write("Content-Length: " + jsonData.length() + "\r\n");
-         out.write("Lamport-Timestamp: " + lamportClock.getTime() + "\r\n");
-         out.write("\r\n");
-         out.write(jsonData);
-         out.flush();
+                String key = parts[0].trim();
+                String value = parts[1].trim();
+                dataMap.put(key, value);
+            }
+        }
 
-         // Read response
-         String responseLine;
-         while (!(responseLine = in.readLine()).isEmpty()) {
-             // Process response headers if needed
-         }
+        // Check if 'id' exists and convert to JSON if valid
+        if (!dataMap.containsKey("id")) {
+            System.out.println("Missing 'id' field, entry rejected.");
+            return null;
+        }
 
-         socket.close();
-         System.out.println("Data sent to Aggregation Server.");
+        // Build JSON string
+        StringBuilder jsonBuilder = new StringBuilder();
+        jsonBuilder.append("{\n");
+        for (Map.Entry<String, String> entry : dataMap.entrySet()) {
+            jsonBuilder.append(String.format("    \"%s\": \"%s\",\n", entry.getKey(), entry.getValue()));
+        }
+        // Remove the last comma and close the JSON object
+        jsonBuilder.setLength(jsonBuilder.length() - 2);
+        jsonBuilder.append("\n}");
 
-     } catch (IOException e) {
-         e.printStackTrace();
-     }
- }
+        return jsonBuilder.toString();
+    }
 
- private static Map<String, String> parseDataFile(String data) {
-     Map<String, String> dataMap = new HashMap<>();
-     String[] lines = data.split("\n");
-     for (String line : lines) {
-         String[] keyValue = line.trim().split(":", 2);
-         if (keyValue.length == 2) {
-             dataMap.put(keyValue[0], keyValue[1]);
-         }
-     }
-     return dataMap;
- }
+    private static void sendDataToServer(String jsonData) throws IOException {
+        lamportClock.tick(); // Increment Lamport clock before sending
+
+        try (Socket socket = new Socket(serverAddress, serverPort);
+             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
+
+            // Prepare HTTP PUT request with Lamport-Clock header
+            StringBuilder request = new StringBuilder();
+            request.append("PUT /weather.json HTTP/1.1\r\n");
+            request.append("Host: ").append(serverAddress).append("\r\n");
+            request.append("User-Agent: ContentServer/1.0\r\n");
+            request.append("Content-Type: application/json\r\n");
+            request.append("Content-Length: ").append(jsonData.length()).append("\r\n");
+            request.append("Lamport-Clock: ").append(lamportClock.getClock()).append("\r\n"); // Include Lamport clock
+            request.append("\r\n"); // End of headers
+            request.append(jsonData);
+
+            // Send entire request (headers and body)
+            out.print(request.toString());
+            out.flush();
+
+            // Read response headers
+            String responseLine;
+            int lamportClockValue = lamportClock.getClock();
+            boolean lamportClockReceived = false;
+
+            while ((responseLine = in.readLine()) != null && !responseLine.isEmpty()) {
+                System.out.println("Server Response Header: " + responseLine);
+
+                if (responseLine.startsWith("Lamport-Clock:")) {
+                    String clockValueStr = responseLine.substring("Lamport-Clock:".length()).trim();
+                    lamportClockValue = Integer.parseInt(clockValueStr);
+                    lamportClockReceived = true;
+                }
+            }
+
+            // Update Lamport clock if value received
+            if (lamportClockReceived) {
+                lamportClock.update(lamportClockValue);
+                System.out.println("Lamport clock updated to: " + lamportClock.getClock());
+            } else {
+                System.out.println("No Lamport clock value received from server.");
+            }
+
+            // Optionally read and print response body
+            while ((responseLine = in.readLine()) != null) {
+                System.out.println("Server Response Body: " + responseLine);
+            }
+        }
+    }
 }

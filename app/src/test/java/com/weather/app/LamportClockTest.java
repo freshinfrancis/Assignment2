@@ -1,60 +1,70 @@
+// File: LamportClockTest.java
 package com.weather.app;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import org.junit.jupiter.api.Test;
-
-//File: LamportClockTest.java
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 public class LamportClockTest {
 
- @Test
- public void testInitialTimeIsZero() {
-     LamportClock clock = new LamportClock();
-     assertEquals(0, clock.getTime(), "Initial Lamport clock time should be zero");
- }
+    private LamportClock lamportClock;
 
- @Test
- public void testIncrement() {
-     LamportClock clock = new LamportClock();
-     clock.increment();
-     assertEquals(1, clock.getTime(), "Lamport clock time should be incremented to one");
- }
+    @Before
+    public void setup() {
+        lamportClock = new LamportClock();
+    }
 
- @Test
- public void testUpdateWithSmallerTime() {
-     LamportClock clock = new LamportClock();
-     clock.update(0);
-     assertEquals(0, clock.getTime(), "Lamport clock time should remain zero after update with zero");
- }
+    @Test
+    public void testInitialClockValue() {
+        // Verify that the initial clock value is 0
+        assertEquals(0, lamportClock.getClock());
+    }
 
- @Test
- public void testUpdateWithLargerTime() {
-     LamportClock clock = new LamportClock();
-     clock.update(5);
-     assertEquals(5, clock.getTime(), "Lamport clock time should update to the larger received time");
- }
+    @Test
+    public void testTickIncrementsClock() {
+        // Tick the clock once and verify it increments by 1
+        lamportClock.tick();
+        assertEquals(1, lamportClock.getClock());
 
- @Test
- public void testIncrementAfterUpdate() {
-     LamportClock clock = new LamportClock();
-     clock.update(5);
-     clock.increment();
-     assertEquals(6, clock.getTime(), "Lamport clock time should increment after update");
- }
+        // Tick again to check multiple increments
+        lamportClock.tick();
+        assertEquals(2, lamportClock.getClock());
+    }
 
- @Test
- public void testConcurrentUpdates() {
-     LamportClock clock = new LamportClock();
+    @Test
+    public void testUpdateWithLesserClockValue() {
+        // Tick the clock to increment it
+        lamportClock.tick(); // clock = 1
 
-     // Simulate concurrent events
-     clock.increment(); // Local event
-     clock.update(3);   // Receive message with timestamp 3
+        // Update with a lesser clock value, expect no change other than increment
+        lamportClock.update(0);
+        assertEquals(2, lamportClock.getClock());
+    }
 
-     assertEquals(3, clock.getTime(), "Lamport clock should update to 3");
-     clock.increment();
-     assertEquals(4, clock.getTime(), "Lamport clock should increment to 4");
- }
+    @Test
+    public void testUpdateWithGreaterClockValue() {
+        // Update the clock with a greater value
+        lamportClock.update(5);
+        assertEquals(6, lamportClock.getClock());
+    }
+
+    @Test
+    public void testUpdateWithEqualClockValue() {
+        // Tick the clock and update with the same value
+        lamportClock.tick(); // clock = 1
+        lamportClock.update(1); // Both are the same
+
+        // Ensure that the clock increments only by one more
+        assertEquals(2, lamportClock.getClock());
+    }
+
+    @Test
+    public void testToStringMethod() {
+        // Verify the toString method reflects the correct clock value
+        lamportClock.tick();
+        assertEquals("1", lamportClock.toString());
+
+        lamportClock.update(5);
+        assertEquals("6", lamportClock.toString());
+    }
 }

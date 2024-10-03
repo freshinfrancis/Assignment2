@@ -22,7 +22,7 @@ public class GETClientTest {
 
      Thread contentServerThread = new Thread(() -> {
          try {
-             ContentServer.main(new String[]{"localhost:8080", "test_weather_data.txt"});
+             ContentServer.main(new String[]{"localhost:8080", "txt.txt"});
          } catch (Exception e) {
              e.printStackTrace();
          }

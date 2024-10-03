@@ -1,26 +1,30 @@
+// File: LamportClock.java
 package com.weather.app;
 
-
 public class LamportClock {
- private long time;
+    public int clock;
 
- public LamportClock() {
-     this.time = 0;
- }
+    public LamportClock() {
+        this.clock = 0;
+    }
 
- public synchronized void increment() {
-     time++;
- }
+    // Increment the clock for internal events
+    public synchronized void tick() {
+        clock++;
+    }
 
- public synchronized void update(long receivedTime) {
-     time = Math.max(time, receivedTime) + 1;
- }
+    // Update the clock on message reception
+    public synchronized void update(int receivedClock) {
+        clock = Math.max(clock, receivedClock);
+        clock++;
+    }
 
- public synchronized long getTime() {
-     return time;
- }
+    public synchronized int getClock() {
+        return clock;
+    }
+
+    @Override
+    public synchronized String toString() {
+        return Integer.toString(clock);
+    }
 }
-
-
-
-

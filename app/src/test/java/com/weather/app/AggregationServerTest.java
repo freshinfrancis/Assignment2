@@ -1,94 +1,73 @@
+// File: AggregationServerTest.java
 package com.weather.app;
 
-//File: AggregationServerTest.java
-import org.junit.jupiter.api.*;
-import static org.junit.jupiter.api.Assertions.*;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
+
 import java.io.*;
-import java.net.*;
-import java.util.concurrent.*;
+import java.net.Socket;
+import java.time.Instant;
+
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.*;
 
 public class AggregationServerTest {
 
- private static Thread serverThread;
+    private Socket mockSocket;
+    private BufferedReader mockReader;
+    private PrintWriter mockWriter;
 
- @BeforeAll
- public static void startServer() throws Exception {
-     // Start the AggregationServer in a separate thread
-     serverThread = new Thread(() -> {
-         try {
-             AggregationServer.main(new String[]{});
-         } catch (Exception e) {
-             e.printStackTrace();
-         }
-     });
-     serverThread.start();
+    @Before
+    public void setup() throws IOException {
+        mockSocket = mock(Socket.class);
+        mockReader = mock(BufferedReader.class);
+        mockWriter = mock(PrintWriter.class);
 
-     // Give the server time to start
-     Thread.sleep(1000);
- }
+        when(mockSocket.getInputStream()).thenReturn(new ByteArrayInputStream("".getBytes()));
+        when(mockSocket.getOutputStream()).thenReturn(new ByteArrayOutputStream());
+    }
 
- @AfterAll
- public static void stopServer() throws Exception {
-     // Implement server shutdown if possible
-     // For this example, we'll skip server shutdown
- }
+    @Test
+    public void testHandlePutRequestWithValidData() throws IOException {
+        String validJson = "{\"id\":\"123\", \"temperature\":\"25\", \"state\":\"SA\"}";
 
- @Test
- public void testServerReceivesPutRequest() throws Exception {
-     // Simulate ContentServer sending a PUT request
-     Socket socket = new Socket("localhost", 8080);
-     BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+        when(mockReader.readLine()).thenReturn("PUT / HTTP/1.1")
+                .thenReturn("Content-Length: " + validJson.length())
+                .thenReturn("Lamport-Clock: 1")
+                .thenReturn(validJson)
+                .thenReturn(""); // End of headers
 
-     String jsonData = "{\"id\":\"TEST_ID\",\"name\":\"Test Station\",\"state\":\"TS\"}";
-     int contentLength = jsonData.length();
+        AggregationServer.handleClient(mockSocket);
 
-     out.write("PUT /weather HTTP/1.1\r\n");
-     out.write("Host: localhost\r\n");
-     out.write("Content-Type: application/json\r\n");
-     out.write("Content-Length: " + contentLength + "\r\n");
-     out.write("Lamport-Timestamp: 1\r\n");
-     out.write("\r\n");
-     out.write(jsonData);
-     out.flush();
+        verify(mockWriter, atLeastOnce()).println("HTTP/1.1 201 Created");
+    }
 
-     // Read response
-     BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-     String statusLine = in.readLine();
-     assertTrue(statusLine.contains("200"), "Response should be 200 OK");
+    @Test
+    public void testHandleGetRequest() throws IOException {
+        JsonObject jsonData = JsonParser.parseString("{\"id\":\"123\", \"temperature\":\"25\", \"state\":\"SA\"}").getAsJsonObject();
+        AggregationServer.weatherData.put("123", jsonData);
 
-     socket.close();
+        when(mockReader.readLine()).thenReturn("GET /weather.json HTTP/1.1").thenReturn("").thenReturn(null);
 
-     // Now, simulate a GET request to verify data was stored
-     socket = new Socket("localhost", 8080);
-     out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-     in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        AggregationServer.handleClient(mockSocket);
 
-     out.write("GET /weather HTTP/1.1\r\n");
-     out.write("Host: localhost\r\n");
-     out.write("\r\n");
-     out.flush();
+        verify(mockWriter).println("HTTP/1.1 200 OK");
+    }
 
-     // Read response status line
-     statusLine = in.readLine();
-     assertTrue(statusLine.contains("200"), "Response should be 200 OK");
+    @Test
+    public void testCleanExpiredData() {
+        // Simulate expired data in weatherData map
+        JsonObject expiredData = new JsonObject();
+        expiredData.addProperty("id", "123");
+        expiredData.addProperty("timestamp", Instant.now().toEpochMilli() - 40000); // 40 seconds ago
+        expiredData.addProperty("origin", "content-server");
 
-     // Read headers
-     String line;
-     int responseContentLength = 0;
-     while (!(line = in.readLine()).isEmpty()) {
-         if (line.startsWith("Content-Length:")) {
-             responseContentLength = Integer.parseInt(line.split(": ")[1]);
-         }
-     }
+        AggregationServer.weatherData.put("123", expiredData);
+        AggregationServer.cleanExpiredData();
 
-     // Read body
-     char[] bodyChars = new char[responseContentLength];
-     in.read(bodyChars);
-     String responseBody = new String(bodyChars);
-
-     assertTrue(responseBody.contains("\"id\":\"TEST_ID\""), "Response should contain the test data");
-
-     socket.close();
- }
+        assertTrue(AggregationServer.weatherData.isEmpty());
+    }
 }
-

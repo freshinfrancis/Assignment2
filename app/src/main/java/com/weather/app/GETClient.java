@@ -1,98 +1,133 @@
+// File: GETClient.java
 package com.weather.app;
 
 import java.io.*;
 import java.net.*;
-import java.util.*;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 public class GETClient {
- private static LamportClock lamportClock = new LamportClock();
+    private static String serverAddress;
+    private static int serverPort;
+    private static String stationId;
+    private static final LamportClock lamportClock = new LamportClock();
 
- public static void main(String[] args) {
-     if (args.length < 1) {
-         System.out.println("Usage: java GETClient <server_host>:<port> [station_id]");
-         return;
-     }
+    public static void main(String[] args) {
 
-     String serverAddress = args[0];
-     String stationId = args.length >= 2 ? args[1] : null;
+        if (args.length < 1 || args.length > 2) {
+            System.out.println("Usage: java GETClient <server-address:port> [station-id]");
+            return;
+        }
 
-     String[] serverParts = serverAddress.split(":");
-     String host = serverParts[0];
-     int port = Integer.parseInt(serverParts[1]);
+        String serverInfo = args[0];
+        if (args.length == 2) {
+            stationId = args[1];
+        }
 
-     try {
-         // Send HTTP GET request
-         Socket socket = new Socket(host, port);
-         BufferedWriter out = new BufferedWriter(
-                 new OutputStreamWriter(socket.getOutputStream()));
-         BufferedReader in = new BufferedReader(
-                 new InputStreamReader(socket.getInputStream()));
+        // Split the server info into address and port
+        String[] serverParts = serverInfo.split(":");
+        if (serverParts.length != 2) {
+            System.out.println("Invalid server info format. Expected <server-address:port>");
+            return;
+        }
 
-         String path = "/weather";
-         if (stationId != null) {
-             path += "?id=" + URLEncoder.encode(stationId, "UTF-8");
-         }
+        serverAddress = serverParts[0];
+        try {
+            serverPort = Integer.parseInt(serverParts[1]);
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid port number: " + serverParts[1]);
+            return;
+        }
 
-         synchronized (lamportClock) {
-             lamportClock.increment();
-         }
+        try {
+            String jsonResponse = sendGetRequest();
+            if (jsonResponse != null) {
+                displayWeatherData(jsonResponse);
+            } else {
+                System.out.println("No response from server.");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-         out.write("GET " + path + " HTTP/1.1\r\n");
-         out.write("Host: " + host + "\r\n");
-         out.write("Lamport-Timestamp: " + lamportClock.getTime() + "\r\n");
-         out.write("\r\n");
-         out.flush();
+    private static String sendGetRequest() throws IOException {
+        lamportClock.tick(); // Increment Lamport clock before sending
 
-         // Read response status line
-         String statusLine = in.readLine();
-         if (statusLine == null || !statusLine.contains("200")) {
-             System.out.println("Failed to get data from server.");
-             socket.close();
-             return;
-         }
+        try (Socket socket = new Socket(serverAddress, serverPort);
+             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
 
-         // Read headers
-         String line;
-         int contentLength = 0;
-         while (!(line = in.readLine()).isEmpty()) {
-             if (line.startsWith("Content-Length:")) {
-                 contentLength = Integer.parseInt(line.split(": ")[1]);
-             }
-         }
+            // Prepare HTTP GET request with Lamport-Clock header
+            StringBuilder request = new StringBuilder();
+            request.append("GET /weather.json HTTP/1.1\r\n");
+            request.append("Host: ").append(serverAddress).append("\r\n");
+            request.append("User-Agent: GETClient/1.0\r\n");
+            request.append("Accept: application/json\r\n");
+            request.append("Lamport-Clock: ").append(lamportClock.getClock()).append("\r\n"); // Include Lamport clock
+            request.append("\r\n"); // End of headers
 
-         // Read body
-         char[] bodyChars = new char[contentLength];
-         in.read(bodyChars);
-         String responseBody = new String(bodyChars);
+            // Send request
+            out.print(request.toString());
+            out.flush();
 
-         // Parse and display weather data
-         displayWeatherData(responseBody);
+            // Read response status line
+            String statusLine = in.readLine();
+            if (statusLine == null || !statusLine.contains("200")) {
+                System.out.println("Failed to get data from server.");
+                return null;
+            }
 
-         socket.close();
+            // Read headers and extract Lamport-Clock
+            String line;
+            int serverLamportClock = 0;
+            int contentLength = 0;
+            boolean lamportClockReceived = false;
 
-     } catch (IOException e) {
-         e.printStackTrace();
-     }
- }
+            while ((line = in.readLine()) != null && !line.isEmpty()) {
+                if (line.startsWith("Lamport-Clock:")) {
+                    String clockValueStr = line.substring("Lamport-Clock:".length()).trim();
+                    serverLamportClock = Integer.parseInt(clockValueStr);
+                    lamportClockReceived = true;
+                } else if (line.startsWith("Content-Length:")) {
+                    contentLength = Integer.parseInt(line.substring("Content-Length:".length()).trim());
+                }
+            }
 
- private static void displayWeatherData(String jsonData) {
-     // Remove JSON formatting and display attributes
-     jsonData = jsonData.trim();
-     if (jsonData.startsWith("[")) {
-         jsonData = jsonData.substring(1, jsonData.length() - 1);
-     }
-     String[] dataObjects = jsonData.split("\\},\\{");
-     for (String dataObject : dataObjects) {
-         dataObject = dataObject.replaceAll("[\\{\\}]", "");
-         String[] attributes = dataObject.split(",");
-         for (String attribute : attributes) {
-             String[] keyValue = attribute.split(":", 2);
-             String key = keyValue[0].replaceAll("\"", "").trim();
-             String value = keyValue[1].replaceAll("\"", "").trim();
-             System.out.println(key + ": " + value);
-         }
-         System.out.println("-----------------------------------");
-     }
- }
+            // Update Lamport clock if value received
+            if (lamportClockReceived) {
+                lamportClock.update(serverLamportClock);
+                System.out.println("Lamport clock updated to: " + lamportClock.getClock());
+            } else {
+                System.out.println("No Lamport clock value received from server.");
+            }
+
+            // Read body
+            char[] bodyChars = new char[contentLength];
+            int totalRead = 0;
+            while (totalRead < contentLength) {
+                int read = in.read(bodyChars, totalRead, contentLength - totalRead);
+                if (read == -1) {
+                    break;
+                }
+                totalRead += read;
+            }
+            String responseBody = new String(bodyChars);
+
+            return responseBody.trim();
+        }
+    }
+
+    private static void displayWeatherData(String jsonData) {
+    	Gson gson = new Gson();
+        
+        // Parse JSON data
+    	jsonData = jsonData.replace("{", "").replace("}", "").replace("\"", "");
+
+        System.out.println("Received Weather Data:");
+        
+        System.out.println(jsonData);
+    }
 }
-
