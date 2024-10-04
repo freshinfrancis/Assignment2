@@ -48,10 +48,10 @@ src/main/com/weather/app/
 1. Start the Aggregation Server
 - Open a terminal and run the following command to start the Aggregation Server:
 
-`java -cp bin com.weather.app.AggregationServer <port>`
+`java -cp bin com.weather.app.AggregationServer <server-address:port>`
 
 Usage:
-`java -cp bin com.weather.app.AggregationServer 4567`
+`java -cp bin com.weather.app.AggregationServer`
 
 2. Start the Content Server
 - In a new terminal, run the following command to start the Content Server. Replace <server-address:port> with the address and port of the Aggregation Server, and provide the path to the weather data file.
@@ -102,7 +102,7 @@ Compiling and Running the Programs
 4. Provide the necessary arguments in the Run Configurations:
 -   Click on Run > Run Configurations....
 -   Select Java Application for your ContentServer.
--   In the the Arguments tab, add: http://localhost:4567.
+-   In the the Arguments tab, add: http://localhost:4567 txt.txt.
 -   Click Apply and then Run.
 
 ## GET Client
@@ -122,47 +122,60 @@ Compiling and Running the Programs
 
 ## Step by Step Development Process
 
-1.	Initial Setup:
+1. Designing the Architecture of the system:
+- Drew a design sketch of the architecture of the system on draw.io.
+   
+2.	Initial Setup:
 -	Created a basic weather app with default input values in the content server.
 -	Updated the data in the aggregation server and initiated GET requests from the client.
 -	This step helped in understanding how GET and PUT requests work and how the client-server communication occurs using sockets.
 
-2.	Data Upload:
+3.	Data Upload:
 -	Attempted to upload data from the default JSON file in the content server to the aggregation server.
 
-3.	Code Modifications:
+4.	Code Modifications:
 -	Modified the content server code to print the PUT message as requested.
 -	Updated the aggregation server to read both the header and JSON data, saving it in the handlePUT request function.
 
-4.	Intermediate Storage Implementation:
+5.	Intermediate Storage Implementation:
 -	Modified the aggregation server to create an intermediate storage temporary file, allowing the server to withstand crashes.
 -	Data is now stored in a temporary file, validated, and then sent to the permanent data file.
 
-5.	Response Codes:
+6.	Response Codes:
 -	Enhanced the aggregation server code to include success and failure codes during execution.
 
-6.	Port Configuration:
+7.	Port Configuration:
 -	Set a default port (4567) for the aggregation server.
 -	Implemented the option to specify a custom port number via command-line arguments.
 
-7.	Data Management:
+8.	Data Management:
 -	Designed the aggregation server to automatically remove any items in the JSON that have not communicated with the server for 30 seconds.
 -	Utilized a HashMap to store the file along with data and timestamps to create weather data, which is transformed back to JSON format when a GET request is made.
 
-8.	GET Client Enhancements:
+9.	GET Client Enhancements:
 -	Modified the GET client code to allow using a custom port number via command-line arguments.
 -	The client can now strip the JSON formatting of the data received from the aggregation server and display it in plain text format.
 
-9.	Timestamping and Ordering:
+10.	Timestamping and Ordering:
 -	Integrated a Lamport clock to timestamp requests, ensuring correct ordering.
 -	Enhanced the processing and formatting of server responses for improved readability.
 
-10.	Testing:
+11.	Testing:
 -	Included JUnit test cases for all code components to ensure functionality and reliability.
 
-11.	Code Documentation:
+12.	Code Documentation:
 -	Provided detailed comments throughout the code to enhance understanding and maintainability.
 
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+# References
 
+- ChatGPT for understanding how GET and PUT requests work, converting text to json, how to run code on Maven Eclipse, understanding lamport clocks, general guidance on implementing and applying code solutions, refining the comments in the code.
 
+- Lamport, Leslie. "Time, Clocks, and the Ordering of Events in a Distributed System." Massachusetts Computer Associates, Inc.
+
+- GeeksforGeeks: Various functionalities were implemented based on tutorials and articles found on GeeksforGeeks.
+  
+- Stack Overflow: Solutions and code snippets to errors encountered during implementations found from discussions and examples available on Stack Overflow.
+
+- Github : References were taken from certain Github repositories to help in getting ideas on how to implement the solutions.
 
