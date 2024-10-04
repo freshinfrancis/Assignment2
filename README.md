@@ -1,5 +1,5 @@
 # Distributed Systems Assignment 2
-*Student:* Freshin Francis (a1942887)
+Student :: a1942887
 
 ## Content Server
 - The Content Server is responsible for transmitting weather data to an Aggregation Server through a socket connection. It reads weather data from a specified feed file, converts it to JSON format, and sends it via HTTP PUT requests. The server includes retry logic for connection failures, tracks the last active time for each socket, and maintains a Lamport clock to ensure synchronization with the Aggregation Server.
@@ -114,6 +114,11 @@ Compiling and Running the Programs
 -   Select Java Application for your GETClient.
 -   In the the Arguments tab, add: http://localhost:4567.
 -   Click Apply and then Run.
+
+## Running Test Cases in Eclipse
+- Right click on the test classes(AggregationServerTest.java, ContentServerTest.java, GETClientTest.java and LamportClock.java) in the Package Explorer.
+- Select Run as JUnit Test or run 'mvn test' in command line.
+- The JUnit view will show the results of the tests.
   
 ## Notes
 •	Ensure that the Aggregation Server is running before starting the Content Server or GET Client.
