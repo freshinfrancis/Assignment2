@@ -36,36 +36,36 @@
 
 # Running the Project in Eclipse
 # Prerequisites:
--•	Ensure you have the Java Development Kit (JDK) installed.
--•	Place the JSON library (e.g., Gson) in a lib/ folder within your project directory.
+•	Ensure you have the Java Development Kit (JDK) installed.
+•	Place the JSON library (e.g., Gson) in a lib/ folder within your project directory.
 
 # Importing the Project:
--1.	Open Eclipse and select File > Import.
--2.	Choose Existing Projects into Workspace and click Next.
--3.	Browse to the location of your project and select it, then click Finish.
+- 1.	Open Eclipse and select File > Import.
+- 2.	Choose Existing Projects into Workspace and click Next.
+- 3.	Browse to the location of your project and select it, then click Finish.
    
 # Compiling and Running the Programs:
 - Aggregation Server:
--1.	Open the AggregationServer.java file.
--2.	Right-click on the file in the Package Explorer and select Run As > Java Application.
--3.	Default port of Aggregation set as 4567. This can be modified by passing different arguments in run configurations.
--4.	Provide the port number as an argument in the run configuration:
+- 1.	Open the AggregationServer.java file.
+- 2.	Right-click on the file in the Package Explorer and select Run As > Java Application.
+- 3.	Default port of Aggregation set as 4567. This can be modified by passing different arguments in run configurations.
+- 4.	Provide the port number as an argument in the run configuration:
 -    o	Select Java Application for your AggregationServer.
 -    o	Click Apply and then Run.
 
 Content Server:
--1.	Open the ContentServer.java file.
--2.	Right-click on the file in the Package Explorer and select Run As > Java Application.
--3.	Provide the necessary arguments in the run configuration:
+- 1.	Open the ContentServer.java file.
+- 2.	Right-click on the file in the Package Explorer and select Run As > Java Application.
+- 3.	Provide the necessary arguments in the run configuration:
 -    o	Click on Run > Run Configurations...
 -    o	Select Java Application for your ContentServer.
 -    o	In the Arguments tab, add: http://localhost:4567.
 -    o	Click Apply and then Run.
 
 GET Client:
--1.	Open the GETClient.java file.
--2.	Right-click on the file in the Package Explorer and select Run As > Java Application.
--3.	Provide the server URL as an argument:
+- 1.	Open the GETClient.java file.
+- 2.	Right-click on the file in the Package Explorer and select Run As > Java Application.
+- 3.	Provide the server URL as an argument:
 -    o	Click on Run > Run Configurations...
 -    o	Select Java Application for your GETClient.
 -    o	In the Arguments tab, add: http://localhost:8080.
