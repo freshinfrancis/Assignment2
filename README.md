@@ -42,7 +42,7 @@ src/main/com/weather/app/
 1.	Navigate to the root directory of the project.
 2.	Compile the Java files:
 
-```javac -d bin src/main/com/weather/app/*.java
+`javac -d bin src/main/com/weather/app/*.java`
 
 # Running the Servers and Clients
 1. Start the Aggregation Server
@@ -51,23 +51,23 @@ src/main/com/weather/app/
 `java -cp bin com.weather.app.AggregationServer <port>`
 
 Usage:
-```java -cp bin com.weather.app.AggregationServer 4567
+`java -cp bin com.weather.app.AggregationServer 4567`
 
 2. Start the Content Server
 - In a new terminal, run the following command to start the Content Server. Replace <server-address:port> with the address and port of the Aggregation Server, and provide the path to the weather data file.
 
-```java -cp bin com.weather.app.ContentServer <server-address:port> <file-path>
+`java -cp bin com.weather.app.ContentServer <server-address:port> <file-path>`
 
 Usage:
-```java -cp bin com.weather.app.ContentServer localhost:4567 txt.txt
+`java -cp bin com.weather.app.ContentServer localhost:4567 txt.txt`
 
 3. Run the GET Client
 - In another terminal, run the GET Client with the server address and port. Optionally, you can specify a station ID.
 
-```java -cp bin com.weather.app.GETClient <server-address:port> [station-id]
+`java -cp bin com.weather.app.GETClient <server-address:port> [station-id]`
 
 Usage:
-java -cp bin com.weather.app.GETClient localhost:4567
+`java -cp bin com.weather.app.GETClient localhost:4567`
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 ## Running the Project in Eclipse
