@@ -35,7 +35,7 @@
 ------------------------------------------------------------------------------------------------------------------------------------------------
 ## Running the Project using Command Line
 
-Directory Structure
+Directory Structure :: 
 src/main/com/weather/app/
 
 # Building the Project
@@ -117,4 +117,52 @@ Compiling and Running the Programs
   
 # Notes
 •	Ensure that the Aggregation Server is running before starting the Content Server or GET Client.
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+## Step by Step Development Process
+
+1.	Initial Setup:
+-	Created a basic weather app with default input values in the content server.
+-	Updated the data in the aggregation server and initiated GET requests from the client.
+-	This step helped in understanding how GET and PUT requests work and how the client-server communication occurs using sockets.
+
+2.	Data Upload:
+-	Attempted to upload data from the default JSON file in the content server to the aggregation server.
+
+3.	Code Modifications:
+-	Modified the content server code to print the PUT message as requested.
+-	Updated the aggregation server to read both the header and JSON data, saving it in the handlePUT request function.
+
+4.	Intermediate Storage Implementation:
+-	Modified the aggregation server to create an intermediate storage temporary file, allowing the server to withstand crashes.
+-	Data is now stored in a temporary file, validated, and then sent to the permanent data file.
+
+5.	Response Codes:
+-	Enhanced the aggregation server code to include success and failure codes during execution.
+
+6.	Port Configuration:
+-	Set a default port (4567) for the aggregation server.
+-	Implemented the option to specify a custom port number via command-line arguments.
+
+7.	Data Management:
+-	Designed the aggregation server to automatically remove any items in the JSON that have not communicated with the server for 30 seconds.
+-	Utilized a HashMap to store the file along with data and timestamps to create weather data, which is transformed back to JSON format when a GET request is made.
+
+8.	GET Client Enhancements:
+-	Modified the GET client code to allow using a custom port number via command-line arguments.
+-	The client can now strip the JSON formatting of the data received from the aggregation server and display it in plain text format.
+
+9.	Timestamping and Ordering:
+-	Integrated a Lamport clock to timestamp requests, ensuring correct ordering.
+-	Enhanced the processing and formatting of server responses for improved readability.
+
+10.	Testing:
+-	Included JUnit test cases for all code components to ensure functionality and reliability.
+
+11.	Code Documentation:
+-	Provided detailed comments throughout the code to enhance understanding and maintainability.
+
+
+
 
