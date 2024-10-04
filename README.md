@@ -34,40 +34,53 @@
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 
-# Running the Project in Eclipse
-# Prerequisites:
-•	Ensure you have the Java Development Kit (JDK) installed.
-•	Place the JSON library (e.g., Gson) in a lib/ folder within your project directory.
+## Prerequisites
+Before running the project, ensure that the following requirements are met:
+•	Java Development Kit (JDK) installed on your machine.
+•	JSON library (e.g., Gson) placed in a lib/ folder within your project directory.
 
-# Importing the Project:
-- 1.	Open Eclipse and select File > Import.
-- 2.	Choose Existing Projects into Workspace and click Next.
-- 3.	Browse to the location of your project and select it, then click Finish.
-   
-# Compiling and Running the Programs:
-- Aggregation Server:
-- 1.	Open the AggregationServer.java file.
-- 2.	Right-click on the file in the Package Explorer and select Run As > Java Application.
-- 3.	Default port of Aggregation set as 4567. This can be modified by passing different arguments in run configurations.
-- 4.	Provide the port number as an argument in the run configuration:
--    o	Select Java Application for your AggregationServer.
--    o	Click Apply and then Run.
+## Importing the Project in Eclipse
+To import the project into Eclipse:
+1.	Open Eclipse.
+2.	Select File > Import.
+3.	Choose Existing Projects into Workspace and click Next.
+4.	Browse to the location of your project directory and select it.
+5.	Click Finish to import the project into the workspace.
+Compiling and Running the Programs
 
-Content Server:
-- 1.	Open the ContentServer.java file.
-- 2.	Right-click on the file in the Package Explorer and select Run As > Java Application.
-- 3.	Provide the necessary arguments in the run configuration:
--    o	Click on Run > Run Configurations...
--    o	Select Java Application for your ContentServer.
--    o	In the Arguments tab, add: http://localhost:4567.
--    o	Click Apply and then Run.
+## Aggregation Server
+- Open the AggregationServer.java file in Eclipse.
+- Right-click on the file in the Package Explorer.
+- Select Run As > Java Application.
+- The default port for the Aggregation Server is set to 4567. If needed, you can modify this by passing a different port number in the Run Configurations:
+- Click on Run > Run Configurations....
+-   Select Java Application for your AggregationServer.
+-   If required, in the Arguments tab, provide the port number (e.g., 4567).
+-   Click Apply and then Run.
 
-GET Client:
-- 1.	Open the GETClient.java file.
-- 2.	Right-click on the file in the Package Explorer and select Run As > Java Application.
-- 3.	Provide the server URL as an argument:
--    o	Click on Run > Run Configurations...
--    o	Select Java Application for your GETClient.
--    o	In the Arguments tab, add: http://localhost:8080.
--    o	Click Apply and then Run.
+## Content Server
+- Open the ContentServer.java file in Eclipse.
+- Right-click on the file in the Package Explorer.
+- Select Run As > Java Application.
+- Provide the necessary arguments in the Run Configurations:
+-   Click on Run > Run Configurations....
+-   Select Java Application for your ContentServer.
+-   In the the Arguments tab, add: http://localhost:4567.
+-   Click Apply and then Run.
+
+## GET Client
+1.	Open the GETClient.java file in Eclipse.
+2.	Right-click on the file in the Package Explorer.
+3.	Select Run As > Java Application.
+4.	Provide the server URL in the Run Configurations:
+-   Click on Run > Run Configurations....
+-   Select Java Application for your GETClient.
+-   In the the Arguments tab, add: http://localhost:4567.
+-   Click Apply and then Run.
+  
+# Notes
+•	Ensure that the Aggregation Server is running before starting the Content Server or GET Client.
+
+
+
 
