@@ -19,3 +19,5 @@ Distributed Systems Assignment 2
 - GETClient code modified to enable using custom port no while passing argument on command line. The code is also now able to strip the json format of the data sent from aggregation server display in plain txt format.
 
 - Uses a Lamport clock to timestamp requests, ensuring correct ordering. -Processes and formats server responses for improved readability.
+
+- Included JUnit test cases for all the codes
