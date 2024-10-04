@@ -98,5 +98,20 @@ class ContentServerTest {
 
         socket.close();
     }
+    
+    
+    @Test
+    void testValidFileConversionToJson() throws IOException {
+        String testData = "id: station1\nname: Test Station\n";
+        File tempFile = File.createTempFile("weather", ".txt");
+        try (FileWriter writer = new FileWriter(tempFile)) {
+            writer.write(testData);
+        }
+
+        String jsonData = ContentServer.convertFileToJson(tempFile.getAbsolutePath());
+        assertNotNull(jsonData);
+        assertTrue(jsonData.contains("\"id\": \"station1\""));
+    }
+    
    
 }

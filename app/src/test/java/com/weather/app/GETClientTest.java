@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -78,5 +79,25 @@ class GETClientTest {
 
         // Stop the mock server thread
         mockServerThread.interrupt();
+    }
+    
+    @Test
+    void testInvalidServerResponse() throws IOException {
+        // Setup a local server to return an invalid response
+        ServerSocket serverSocket = new ServerSocket(8080);
+        new Thread(() -> {
+            try (Socket clientSocket = serverSocket.accept();
+                 PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)) {
+                out.println("HTTP/1.1 400 Bad Request");
+                out.println();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }).start();
+
+        String[] args = {"localhost:8080"};
+        GETClient.main(args);
+
+        serverSocket.close();
     }
 }
