@@ -1,0 +1,148 @@
+-------------------------------------------------------------------------------
+Test set: com.weather.app.AggregationServerTest
+-------------------------------------------------------------------------------
+Tests run: 2, Failures: 0, Errors: 2, Skipped: 0, Time elapsed: 0.975 s <<< FAILURE! -- in com.weather.app.AggregationServerTest
+com.weather.app.AggregationServerTest.testHandleGetRequest -- Time elapsed: 0.909 s <<< ERROR!
+org.mockito.exceptions.base.MockitoException: 
+
+Mockito cannot mock this class: class java.net.Socket.
+
+If you're not sure why you're getting this error, please report to the mailing list.
+
+
+Java               : 21
+JVM vendor name    : Oracle Corporation
+JVM vendor version : 21.0.4+8-LTS-274
+JVM name           : Java HotSpot(TM) 64-Bit Server VM
+JVM version        : 21.0.4+8-LTS-274
+JVM info           : mixed mode, sharing
+OS name            : Windows 11
+OS version         : 10.0
+
+
+You are seeing this disclaimer because Mockito is configured to create inlined mocks.
+You can learn about inline mocks and their limitations under item #39 of the Mockito class javadoc.
+
+Underlying exception : org.mockito.exceptions.base.MockitoException: Could not modify all classes [interface java.lang.AutoCloseable, interface java.io.Closeable, class java.net.Socket, class java.lang.Object]
+	at com.weather.app.AggregationServerTest.setUp(AggregationServerTest.java:30)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+Caused by: org.mockito.exceptions.base.MockitoException: Could not modify all classes [interface java.lang.AutoCloseable, interface java.io.Closeable, class java.net.Socket, class java.lang.Object]
+	at net.bytebuddy.TypeCache.findOrInsert(TypeCache.java:153)
+	at net.bytebuddy.TypeCache$WithInlineExpunction.findOrInsert(TypeCache.java:366)
+	at net.bytebuddy.TypeCache.findOrInsert(TypeCache.java:175)
+	at net.bytebuddy.TypeCache$WithInlineExpunction.findOrInsert(TypeCache.java:377)
+	... 2 more
+Caused by: java.lang.IllegalStateException: 
+Byte Buddy could not instrument all classes within the mock's type hierarchy
+
+This problem should never occur for javac-compiled classes. This problem has been observed for classes that are:
+ - Compiled by older versions of scalac
+ - Classes that are part of the Android distribution
+	at org.mockito.internal.creation.bytebuddy.InlineBytecodeGenerator.triggerRetransformation(InlineBytecodeGenerator.java:280)
+	at org.mockito.internal.creation.bytebuddy.InlineBytecodeGenerator.mockClass(InlineBytecodeGenerator.java:213)
+	at org.mockito.internal.creation.bytebuddy.TypeCachingBytecodeGenerator$1.call(TypeCachingBytecodeGenerator.java:51)
+	at org.mockito.internal.creation.bytebuddy.TypeCachingBytecodeGenerator$1.call(TypeCachingBytecodeGenerator.java:48)
+	at net.bytebuddy.TypeCache.findOrInsert(TypeCache.java:153)
+	at net.bytebuddy.TypeCache$WithInlineExpunction.findOrInsert(TypeCache.java:366)
+	at net.bytebuddy.TypeCache.findOrInsert(TypeCache.java:175)
+	at net.bytebuddy.TypeCache$WithInlineExpunction.findOrInsert(TypeCache.java:377)
+	at org.mockito.internal.creation.bytebuddy.TypeCachingBytecodeGenerator.mockClass(TypeCachingBytecodeGenerator.java:41)
+	at org.mockito.internal.creation.bytebuddy.InlineByteBuddyMockMaker.createMockType(InlineByteBuddyMockMaker.java:379)
+	at org.mockito.internal.creation.bytebuddy.InlineByteBuddyMockMaker.doCreateMock(InlineByteBuddyMockMaker.java:339)
+	at org.mockito.internal.creation.bytebuddy.InlineByteBuddyMockMaker.createMock(InlineByteBuddyMockMaker.java:318)
+	at org.mockito.internal.util.MockUtil.createMock(MockUtil.java:53)
+	at org.mockito.internal.MockitoCore.mock(MockitoCore.java:62)
+	at org.mockito.Mockito.mock(Mockito.java:1951)
+	at org.mockito.Mockito.mock(Mockito.java:1862)
+	... 2 more
+Caused by: java.lang.IllegalArgumentException: Unsupported class file major version 65
+	at net.bytebuddy.jar.asm.ClassReader.<init>(ClassReader.java:189)
+	at net.bytebuddy.jar.asm.ClassReader.<init>(ClassReader.java:170)
+	at net.bytebuddy.jar.asm.ClassReader.<init>(ClassReader.java:156)
+	at net.bytebuddy.utility.OpenedClassReader.of(OpenedClassReader.java:86)
+	at net.bytebuddy.dynamic.scaffold.TypeWriter$Default$ForInlining.create(TypeWriter.java:3889)
+	at net.bytebuddy.dynamic.scaffold.TypeWriter$Default.make(TypeWriter.java:2166)
+	at net.bytebuddy.dynamic.scaffold.inline.RedefinitionDynamicTypeBuilder.make(RedefinitionDynamicTypeBuilder.java:224)
+	at net.bytebuddy.dynamic.scaffold.inline.AbstractInliningDynamicTypeBuilder.make(AbstractInliningDynamicTypeBuilder.java:123)
+	at net.bytebuddy.dynamic.DynamicType$Builder$AbstractBase.make(DynamicType.java:3659)
+	at org.mockito.internal.creation.bytebuddy.InlineBytecodeGenerator.transform(InlineBytecodeGenerator.java:391)
+	at java.instrument/java.lang.instrument.ClassFileTransformer.transform(ClassFileTransformer.java:244)
+	at java.instrument/sun.instrument.TransformerManager.transform(TransformerManager.java:188)
+	at java.instrument/sun.instrument.InstrumentationImpl.transform(InstrumentationImpl.java:610)
+	at java.instrument/sun.instrument.InstrumentationImpl.retransformClasses0(Native Method)
+	at java.instrument/sun.instrument.InstrumentationImpl.retransformClasses(InstrumentationImpl.java:225)
+	at org.mockito.internal.creation.bytebuddy.InlineBytecodeGenerator.triggerRetransformation(InlineBytecodeGenerator.java:276)
+	... 17 more
+
+com.weather.app.AggregationServerTest.testHandlePutRequest -- Time elapsed: 0.036 s <<< ERROR!
+org.mockito.exceptions.base.MockitoException: 
+
+Mockito cannot mock this class: class java.net.Socket.
+
+If you're not sure why you're getting this error, please report to the mailing list.
+
+
+Java               : 21
+JVM vendor name    : Oracle Corporation
+JVM vendor version : 21.0.4+8-LTS-274
+JVM name           : Java HotSpot(TM) 64-Bit Server VM
+JVM version        : 21.0.4+8-LTS-274
+JVM info           : mixed mode, sharing
+OS name            : Windows 11
+OS version         : 10.0
+
+
+You are seeing this disclaimer because Mockito is configured to create inlined mocks.
+You can learn about inline mocks and their limitations under item #39 of the Mockito class javadoc.
+
+Underlying exception : org.mockito.exceptions.base.MockitoException: Could not modify all classes [interface java.lang.AutoCloseable, interface java.io.Closeable, class java.net.Socket, class java.lang.Object]
+	at com.weather.app.AggregationServerTest.setUp(AggregationServerTest.java:30)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+Caused by: org.mockito.exceptions.base.MockitoException: Could not modify all classes [interface java.lang.AutoCloseable, interface java.io.Closeable, class java.net.Socket, class java.lang.Object]
+	at net.bytebuddy.TypeCache.findOrInsert(TypeCache.java:153)
+	at net.bytebuddy.TypeCache$WithInlineExpunction.findOrInsert(TypeCache.java:366)
+	at net.bytebuddy.TypeCache.findOrInsert(TypeCache.java:175)
+	at net.bytebuddy.TypeCache$WithInlineExpunction.findOrInsert(TypeCache.java:377)
+	... 2 more
+Caused by: java.lang.IllegalStateException: 
+Byte Buddy could not instrument all classes within the mock's type hierarchy
+
+This problem should never occur for javac-compiled classes. This problem has been observed for classes that are:
+ - Compiled by older versions of scalac
+ - Classes that are part of the Android distribution
+	at org.mockito.internal.creation.bytebuddy.InlineBytecodeGenerator.triggerRetransformation(InlineBytecodeGenerator.java:280)
+	at org.mockito.internal.creation.bytebuddy.InlineBytecodeGenerator.mockClass(InlineBytecodeGenerator.java:213)
+	at org.mockito.internal.creation.bytebuddy.TypeCachingBytecodeGenerator$1.call(TypeCachingBytecodeGenerator.java:51)
+	at org.mockito.internal.creation.bytebuddy.TypeCachingBytecodeGenerator$1.call(TypeCachingBytecodeGenerator.java:48)
+	at net.bytebuddy.TypeCache.findOrInsert(TypeCache.java:153)
+	at net.bytebuddy.TypeCache$WithInlineExpunction.findOrInsert(TypeCache.java:366)
+	at net.bytebuddy.TypeCache.findOrInsert(TypeCache.java:175)
+	at net.bytebuddy.TypeCache$WithInlineExpunction.findOrInsert(TypeCache.java:377)
+	at org.mockito.internal.creation.bytebuddy.TypeCachingBytecodeGenerator.mockClass(TypeCachingBytecodeGenerator.java:41)
+	at org.mockito.internal.creation.bytebuddy.InlineByteBuddyMockMaker.createMockType(InlineByteBuddyMockMaker.java:379)
+	at org.mockito.internal.creation.bytebuddy.InlineByteBuddyMockMaker.doCreateMock(InlineByteBuddyMockMaker.java:339)
+	at org.mockito.internal.creation.bytebuddy.InlineByteBuddyMockMaker.createMock(InlineByteBuddyMockMaker.java:318)
+	at org.mockito.internal.util.MockUtil.createMock(MockUtil.java:53)
+	at org.mockito.internal.MockitoCore.mock(MockitoCore.java:62)
+	at org.mockito.Mockito.mock(Mockito.java:1951)
+	at org.mockito.Mockito.mock(Mockito.java:1862)
+	... 2 more
+Caused by: java.lang.IllegalArgumentException: Unsupported class file major version 65
+	at net.bytebuddy.jar.asm.ClassReader.<init>(ClassReader.java:189)
+	at net.bytebuddy.jar.asm.ClassReader.<init>(ClassReader.java:170)
+	at net.bytebuddy.jar.asm.ClassReader.<init>(ClassReader.java:156)
+	at net.bytebuddy.utility.OpenedClassReader.of(OpenedClassReader.java:86)
+	at net.bytebuddy.dynamic.scaffold.TypeWriter$Default$ForInlining.create(TypeWriter.java:3889)
+	at net.bytebuddy.dynamic.scaffold.TypeWriter$Default.make(TypeWriter.java:2166)
+	at net.bytebuddy.dynamic.scaffold.inline.RedefinitionDynamicTypeBuilder.make(RedefinitionDynamicTypeBuilder.java:224)
+	at net.bytebuddy.dynamic.scaffold.inline.AbstractInliningDynamicTypeBuilder.make(AbstractInliningDynamicTypeBuilder.java:123)
+	at net.bytebuddy.dynamic.DynamicType$Builder$AbstractBase.make(DynamicType.java:3659)
+	at org.mockito.internal.creation.bytebuddy.InlineBytecodeGenerator.transform(InlineBytecodeGenerator.java:391)
+	at java.instrument/java.lang.instrument.ClassFileTransformer.transform(ClassFileTransformer.java:244)
+	at java.instrument/sun.instrument.TransformerManager.transform(TransformerManager.java:188)
+	at java.instrument/sun.instrument.InstrumentationImpl.transform(InstrumentationImpl.java:610)
+	at java.instrument/sun.instrument.InstrumentationImpl.retransformClasses0(Native Method)
+	at java.instrument/sun.instrument.InstrumentationImpl.retransformClasses(InstrumentationImpl.java:225)
+	at org.mockito.internal.creation.bytebuddy.InlineBytecodeGenerator.triggerRetransformation(InlineBytecodeGenerator.java:276)
+	... 17 more
+

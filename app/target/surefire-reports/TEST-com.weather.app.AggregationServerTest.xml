@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.1" name="com.weather.app.AggregationServerTest" time="0.975" tests="2" errors="2" skipped="0" failures="0">
+  <properties>
+    <property name="java.specification.version" value="21"/>
+    <property name="sun.cpu.isalist" value="amd64"/>
+    <property name="sun.jnu.encoding" value="Cp1252"/>
+    <property name="java.class.path" value="C:\Users\fresh\eclipse-workspace\Weather\app\target\test-classes;C:\Users\fresh\eclipse-workspace\Weather\app\target\classes;C:\Users\fresh\.m2\repository\org\junit\jupiter\junit-jupiter-api\5.11.0\junit-jupiter-api-5.11.0.jar;C:\Users\fresh\.m2\repository\org\opentest4j\opentest4j\1.3.0\opentest4j-1.3.0.jar;C:\Users\fresh\.m2\repository\org\junit\platform\junit-platform-commons\1.11.0\junit-platform-commons-1.11.0.jar;C:\Users\fresh\.m2\repository\org\apiguardian\apiguardian-api\1.1.2\apiguardian-api-1.1.2.jar;C:\Users\fresh\.m2\repository\com\google\code\gson\gson\2.11.0\gson-2.11.0.jar;C:\Users\fresh\.m2\repository\com\google\errorprone\error_prone_annotations\2.27.0\error_prone_annotations-2.27.0.jar;C:\Users\fresh\.m2\repository\org\junit\jupiter\junit-jupiter-params\5.11.0\junit-jupiter-params-5.11.0.jar;C:\Users\fresh\.m2\repository\org\mockito\mockito-core\3.9.0\mockito-core-3.9.0.jar;C:\Users\fresh\.m2\repository\net\bytebuddy\byte-buddy\1.10.20\byte-buddy-1.10.20.jar;C:\Users\fresh\.m2\repository\net\bytebuddy\byte-buddy-agent\1.10.20\byte-buddy-agent-1.10.20.jar;C:\Users\fresh\.m2\repository\org\objenesis\objenesis\3.2\objenesis-3.2.jar;C:\Users\fresh\.m2\repository\org\mockito\mockito-inline\3.9.0\mockito-inline-3.9.0.jar;C:\Users\fresh\.m2\repository\junit\junit\4.13.2\junit-4.13.2.jar;C:\Users\fresh\.m2\repository\org\hamcrest\hamcrest-core\1.3\hamcrest-core-1.3.jar;"/>
+    <property name="java.vm.vendor" value="Oracle Corporation"/>
+    <property name="sun.arch.data.model" value="64"/>
+    <property name="user.variant" value=""/>
+    <property name="java.vendor.url" value="https://java.oracle.com/"/>
+    <property name="user.timezone" value="Australia/Adelaide"/>
+    <property name="os.name" value="Windows 11"/>
+    <property name="java.vm.specification.version" value="21"/>
+    <property name="sun.java.launcher" value="SUN_STANDARD"/>
+    <property name="user.country" value="IN"/>
+    <property name="sun.boot.library.path" value="C:\Program Files\Java\jdk-21\bin"/>
+    <property name="sun.java.command" value="C:\Users\fresh\AppData\Local\Temp\surefire8430938628783636516\surefirebooter-20241003160019460_3.jar C:\Users\fresh\AppData\Local\Temp\surefire8430938628783636516 2024-10-03T16-00-19_260-jvmRun1 surefire-20241003160019460_1tmp surefire_0-20241003160019460_2tmp"/>
+    <property name="jdk.debug" value="release"/>
+    <property name="surefire.test.class.path" value="C:\Users\fresh\eclipse-workspace\Weather\app\target\test-classes;C:\Users\fresh\eclipse-workspace\Weather\app\target\classes;C:\Users\fresh\.m2\repository\org\junit\jupiter\junit-jupiter-api\5.11.0\junit-jupiter-api-5.11.0.jar;C:\Users\fresh\.m2\repository\org\opentest4j\opentest4j\1.3.0\opentest4j-1.3.0.jar;C:\Users\fresh\.m2\repository\org\junit\platform\junit-platform-commons\1.11.0\junit-platform-commons-1.11.0.jar;C:\Users\fresh\.m2\repository\org\apiguardian\apiguardian-api\1.1.2\apiguardian-api-1.1.2.jar;C:\Users\fresh\.m2\repository\com\google\code\gson\gson\2.11.0\gson-2.11.0.jar;C:\Users\fresh\.m2\repository\com\google\errorprone\error_prone_annotations\2.27.0\error_prone_annotations-2.27.0.jar;C:\Users\fresh\.m2\repository\org\junit\jupiter\junit-jupiter-params\5.11.0\junit-jupiter-params-5.11.0.jar;C:\Users\fresh\.m2\repository\org\mockito\mockito-core\3.9.0\mockito-core-3.9.0.jar;C:\Users\fresh\.m2\repository\net\bytebuddy\byte-buddy\1.10.20\byte-buddy-1.10.20.jar;C:\Users\fresh\.m2\repository\net\bytebuddy\byte-buddy-agent\1.10.20\byte-buddy-agent-1.10.20.jar;C:\Users\fresh\.m2\repository\org\objenesis\objenesis\3.2\objenesis-3.2.jar;C:\Users\fresh\.m2\repository\org\mockito\mockito-inline\3.9.0\mockito-inline-3.9.0.jar;C:\Users\fresh\.m2\repository\junit\junit\4.13.2\junit-4.13.2.jar;C:\Users\fresh\.m2\repository\org\hamcrest\hamcrest-core\1.3\hamcrest-core-1.3.jar;"/>
+    <property name="sun.cpu.endian" value="little"/>
+    <property name="user.home" value="C:\Users\fresh"/>
+    <property name="user.language" value="en"/>
+    <property name="java.specification.vendor" value="Oracle Corporation"/>
+    <property name="java.version.date" value="2024-07-16"/>
+    <property name="java.home" value="C:\Program Files\Java\jdk-21"/>
+    <property name="file.separator" value="\"/>
+    <property name="basedir" value="C:\Users\fresh\eclipse-workspace\Weather\app"/>
+    <property name="java.vm.compressedOopsMode" value="32-bit"/>
+    <property name="line.separator" value="&#10;"/>
+    <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
+    <property name="java.specification.name" value="Java Platform API Specification"/>
+    <property name="surefire.real.class.path" value="C:\Users\fresh\AppData\Local\Temp\surefire8430938628783636516\surefirebooter-20241003160019460_3.jar"/>
+    <property name="user.script" value=""/>
+    <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
+    <property name="java.runtime.version" value="21.0.4+8-LTS-274"/>
+    <property name="user.name" value="fresh"/>
+    <property name="stdout.encoding" value="Cp1252"/>
+    <property name="path.separator" value=";"/>
+    <property name="os.version" value="10.0"/>
+    <property name="java.runtime.name" value="Java(TM) SE Runtime Environment"/>
+    <property name="file.encoding" value="UTF-8"/>
+    <property name="java.vm.name" value="Java HotSpot(TM) 64-Bit Server VM"/>
+    <property name="localRepository" value="C:\Users\fresh\.m2\repository"/>
+    <property name="java.vendor.url.bug" value="https://bugreport.java.com/bugreport/"/>
+    <property name="java.io.tmpdir" value="C:\Users\fresh\AppData\Local\Temp\"/>
+    <property name="java.version" value="21.0.4"/>
+    <property name="user.dir" value="C:\Users\fresh\eclipse-workspace\Weather\app"/>
+    <property name="os.arch" value="amd64"/>
+    <property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
+    <property name="sun.os.patch.level" value=""/>
+    <property name="native.encoding" value="Cp1252"/>
+    <property name="java.library.path" value="C:\Program Files\Java\jdk-21\bin;C:\WINDOWS\Sun\Java\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\Program Files\Common Files\Oracle\Java\javapath;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\Java\jdk-21\bin;C:\Program Files\Git\cmd;C:\Users\fresh\json-20230618.jar;C:\Users\fresh\AppData\Local\Microsoft\WindowsApps;C:\Users\fresh\AppData\Local\Programs\Microsoft VS Code\bin;C:\apache-maven-3.8.8-bin\apache-maven-3.8.8\bin;C:\Users\fresh\json-20230618.jar;;."/>
+    <property name="java.vm.info" value="mixed mode, sharing"/>
+    <property name="stderr.encoding" value="Cp1252"/>
+    <property name="java.vendor" value="Oracle Corporation"/>
+    <property name="java.vm.version" value="21.0.4+8-LTS-274"/>
+    <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
+    <property name="java.class.version" value="65.0"/>
+  </properties>
+  <testcase name="testHandleGetRequest" classname="com.weather.app.AggregationServerTest" time="0.909">
+    <error message="&#10;Mockito cannot mock this class: class java.net.Socket.&#10;&#10;If you&apos;re not sure why you&apos;re getting this error, please report to the mailing list.&#10;&#10;&#10;Java               : 21&#10;JVM vendor name    : Oracle Corporation&#10;JVM vendor version : 21.0.4+8-LTS-274&#10;JVM name           : Java HotSpot(TM) 64-Bit Server VM&#10;JVM version        : 21.0.4+8-LTS-274&#10;JVM info           : mixed mode, sharing&#10;OS name            : Windows 11&#10;OS version         : 10.0&#10;&#10;&#10;You are seeing this disclaimer because Mockito is configured to create inlined mocks.&#10;You can learn about inline mocks and their limitations under item #39 of the Mockito class javadoc.&#10;&#10;Underlying exception : org.mockito.exceptions.base.MockitoException: Could not modify all classes [interface java.lang.AutoCloseable, interface java.io.Closeable, class java.net.Socket, class java.lang.Object]" type="org.mockito.exceptions.base.MockitoException"><![CDATA[org.mockito.exceptions.base.MockitoException: 
+
+Mockito cannot mock this class: class java.net.Socket.
+
+If you're not sure why you're getting this error, please report to the mailing list.
+
+
+Java               : 21
+JVM vendor name    : Oracle Corporation
+JVM vendor version : 21.0.4+8-LTS-274
+JVM name           : Java HotSpot(TM) 64-Bit Server VM
+JVM version        : 21.0.4+8-LTS-274
+JVM info           : mixed mode, sharing
+OS name            : Windows 11
+OS version         : 10.0
+
+
+You are seeing this disclaimer because Mockito is configured to create inlined mocks.
+You can learn about inline mocks and their limitations under item #39 of the Mockito class javadoc.
+
+Underlying exception : org.mockito.exceptions.base.MockitoException: Could not modify all classes [interface java.lang.AutoCloseable, interface java.io.Closeable, class java.net.Socket, class java.lang.Object]
+	at com.weather.app.AggregationServerTest.setUp(AggregationServerTest.java:30)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+Caused by: org.mockito.exceptions.base.MockitoException: Could not modify all classes [interface java.lang.AutoCloseable, interface java.io.Closeable, class java.net.Socket, class java.lang.Object]
+	at net.bytebuddy.TypeCache.findOrInsert(TypeCache.java:153)
+	at net.bytebuddy.TypeCache$WithInlineExpunction.findOrInsert(TypeCache.java:366)
+	at net.bytebuddy.TypeCache.findOrInsert(TypeCache.java:175)
+	at net.bytebuddy.TypeCache$WithInlineExpunction.findOrInsert(TypeCache.java:377)
+	... 2 more
+Caused by: java.lang.IllegalStateException: 
+Byte Buddy could not instrument all classes within the mock's type hierarchy
+
+This problem should never occur for javac-compiled classes. This problem has been observed for classes that are:
+ - Compiled by older versions of scalac
+ - Classes that are part of the Android distribution
+	at org.mockito.internal.creation.bytebuddy.InlineBytecodeGenerator.triggerRetransformation(InlineBytecodeGenerator.java:280)
+	at org.mockito.internal.creation.bytebuddy.InlineBytecodeGenerator.mockClass(InlineBytecodeGenerator.java:213)
+	at org.mockito.internal.creation.bytebuddy.TypeCachingBytecodeGenerator$1.call(TypeCachingBytecodeGenerator.java:51)
+	at org.mockito.internal.creation.bytebuddy.TypeCachingBytecodeGenerator$1.call(TypeCachingBytecodeGenerator.java:48)
+	at net.bytebuddy.TypeCache.findOrInsert(TypeCache.java:153)
+	at net.bytebuddy.TypeCache$WithInlineExpunction.findOrInsert(TypeCache.java:366)
+	at net.bytebuddy.TypeCache.findOrInsert(TypeCache.java:175)
+	at net.bytebuddy.TypeCache$WithInlineExpunction.findOrInsert(TypeCache.java:377)
+	at org.mockito.internal.creation.bytebuddy.TypeCachingBytecodeGenerator.mockClass(TypeCachingBytecodeGenerator.java:41)
+	at org.mockito.internal.creation.bytebuddy.InlineByteBuddyMockMaker.createMockType(InlineByteBuddyMockMaker.java:379)
+	at org.mockito.internal.creation.bytebuddy.InlineByteBuddyMockMaker.doCreateMock(InlineByteBuddyMockMaker.java:339)
+	at org.mockito.internal.creation.bytebuddy.InlineByteBuddyMockMaker.createMock(InlineByteBuddyMockMaker.java:318)
+	at org.mockito.internal.util.MockUtil.createMock(MockUtil.java:53)
+	at org.mockito.internal.MockitoCore.mock(MockitoCore.java:62)
+	at org.mockito.Mockito.mock(Mockito.java:1951)
+	at org.mockito.Mockito.mock(Mockito.java:1862)
+	... 2 more
+Caused by: java.lang.IllegalArgumentException: Unsupported class file major version 65
+	at net.bytebuddy.jar.asm.ClassReader.<init>(ClassReader.java:189)
+	at net.bytebuddy.jar.asm.ClassReader.<init>(ClassReader.java:170)
+	at net.bytebuddy.jar.asm.ClassReader.<init>(ClassReader.java:156)
+	at net.bytebuddy.utility.OpenedClassReader.of(OpenedClassReader.java:86)
+	at net.bytebuddy.dynamic.scaffold.TypeWriter$Default$ForInlining.create(TypeWriter.java:3889)
+	at net.bytebuddy.dynamic.scaffold.TypeWriter$Default.make(TypeWriter.java:2166)
+	at net.bytebuddy.dynamic.scaffold.inline.RedefinitionDynamicTypeBuilder.make(RedefinitionDynamicTypeBuilder.java:224)
+	at net.bytebuddy.dynamic.scaffold.inline.AbstractInliningDynamicTypeBuilder.make(AbstractInliningDynamicTypeBuilder.java:123)
+	at net.bytebuddy.dynamic.DynamicType$Builder$AbstractBase.make(DynamicType.java:3659)
+	at org.mockito.internal.creation.bytebuddy.InlineBytecodeGenerator.transform(InlineBytecodeGenerator.java:391)
+	at java.instrument/java.lang.instrument.ClassFileTransformer.transform(ClassFileTransformer.java:244)
+	at java.instrument/sun.instrument.TransformerManager.transform(TransformerManager.java:188)
+	at java.instrument/sun.instrument.InstrumentationImpl.transform(InstrumentationImpl.java:610)
+	at java.instrument/sun.instrument.InstrumentationImpl.retransformClasses0(Native Method)
+	at java.instrument/sun.instrument.InstrumentationImpl.retransformClasses(InstrumentationImpl.java:225)
+	at org.mockito.internal.creation.bytebuddy.InlineBytecodeGenerator.triggerRetransformation(InlineBytecodeGenerator.java:276)
+	... 17 more
+]]></error>
+    <system-err><![CDATA[WARNING: A Java agent has been loaded dynamically (C:\Users\fresh\.m2\repository\net\bytebuddy\byte-buddy-agent\1.10.20\byte-buddy-agent-1.10.20.jar)
+WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+WARNING: Dynamic loading of agents will be disallowed by default in a future release
+]]></system-err>
+  </testcase>
+  <testcase name="testHandlePutRequest" classname="com.weather.app.AggregationServerTest" time="0.036">
+    <error message="&#10;Mockito cannot mock this class: class java.net.Socket.&#10;&#10;If you&apos;re not sure why you&apos;re getting this error, please report to the mailing list.&#10;&#10;&#10;Java               : 21&#10;JVM vendor name    : Oracle Corporation&#10;JVM vendor version : 21.0.4+8-LTS-274&#10;JVM name           : Java HotSpot(TM) 64-Bit Server VM&#10;JVM version        : 21.0.4+8-LTS-274&#10;JVM info           : mixed mode, sharing&#10;OS name            : Windows 11&#10;OS version         : 10.0&#10;&#10;&#10;You are seeing this disclaimer because Mockito is configured to create inlined mocks.&#10;You can learn about inline mocks and their limitations under item #39 of the Mockito class javadoc.&#10;&#10;Underlying exception : org.mockito.exceptions.base.MockitoException: Could not modify all classes [interface java.lang.AutoCloseable, interface java.io.Closeable, class java.net.Socket, class java.lang.Object]" type="org.mockito.exceptions.base.MockitoException"><![CDATA[org.mockito.exceptions.base.MockitoException: 
+
+Mockito cannot mock this class: class java.net.Socket.
+
+If you're not sure why you're getting this error, please report to the mailing list.
+
+
+Java               : 21
+JVM vendor name    : Oracle Corporation
+JVM vendor version : 21.0.4+8-LTS-274
+JVM name           : Java HotSpot(TM) 64-Bit Server VM
+JVM version        : 21.0.4+8-LTS-274
+JVM info           : mixed mode, sharing
+OS name            : Windows 11
+OS version         : 10.0
+
+
+You are seeing this disclaimer because Mockito is configured to create inlined mocks.
+You can learn about inline mocks and their limitations under item #39 of the Mockito class javadoc.
+
+Underlying exception : org.mockito.exceptions.base.MockitoException: Could not modify all classes [interface java.lang.AutoCloseable, interface java.io.Closeable, class java.net.Socket, class java.lang.Object]
+	at com.weather.app.AggregationServerTest.setUp(AggregationServerTest.java:30)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+Caused by: org.mockito.exceptions.base.MockitoException: Could not modify all classes [interface java.lang.AutoCloseable, interface java.io.Closeable, class java.net.Socket, class java.lang.Object]
+	at net.bytebuddy.TypeCache.findOrInsert(TypeCache.java:153)
+	at net.bytebuddy.TypeCache$WithInlineExpunction.findOrInsert(TypeCache.java:366)
+	at net.bytebuddy.TypeCache.findOrInsert(TypeCache.java:175)
+	at net.bytebuddy.TypeCache$WithInlineExpunction.findOrInsert(TypeCache.java:377)
+	... 2 more
+Caused by: java.lang.IllegalStateException: 
+Byte Buddy could not instrument all classes within the mock's type hierarchy
+
+This problem should never occur for javac-compiled classes. This problem has been observed for classes that are:
+ - Compiled by older versions of scalac
+ - Classes that are part of the Android distribution
+	at org.mockito.internal.creation.bytebuddy.InlineBytecodeGenerator.triggerRetransformation(InlineBytecodeGenerator.java:280)
+	at org.mockito.internal.creation.bytebuddy.InlineBytecodeGenerator.mockClass(InlineBytecodeGenerator.java:213)
+	at org.mockito.internal.creation.bytebuddy.TypeCachingBytecodeGenerator$1.call(TypeCachingBytecodeGenerator.java:51)
+	at org.mockito.internal.creation.bytebuddy.TypeCachingBytecodeGenerator$1.call(TypeCachingBytecodeGenerator.java:48)
+	at net.bytebuddy.TypeCache.findOrInsert(TypeCache.java:153)
+	at net.bytebuddy.TypeCache$WithInlineExpunction.findOrInsert(TypeCache.java:366)
+	at net.bytebuddy.TypeCache.findOrInsert(TypeCache.java:175)
+	at net.bytebuddy.TypeCache$WithInlineExpunction.findOrInsert(TypeCache.java:377)
+	at org.mockito.internal.creation.bytebuddy.TypeCachingBytecodeGenerator.mockClass(TypeCachingBytecodeGenerator.java:41)
+	at org.mockito.internal.creation.bytebuddy.InlineByteBuddyMockMaker.createMockType(InlineByteBuddyMockMaker.java:379)
+	at org.mockito.internal.creation.bytebuddy.InlineByteBuddyMockMaker.doCreateMock(InlineByteBuddyMockMaker.java:339)
+	at org.mockito.internal.creation.bytebuddy.InlineByteBuddyMockMaker.createMock(InlineByteBuddyMockMaker.java:318)
+	at org.mockito.internal.util.MockUtil.createMock(MockUtil.java:53)
+	at org.mockito.internal.MockitoCore.mock(MockitoCore.java:62)
+	at org.mockito.Mockito.mock(Mockito.java:1951)
+	at org.mockito.Mockito.mock(Mockito.java:1862)
+	... 2 more
+Caused by: java.lang.IllegalArgumentException: Unsupported class file major version 65
+	at net.bytebuddy.jar.asm.ClassReader.<init>(ClassReader.java:189)
+	at net.bytebuddy.jar.asm.ClassReader.<init>(ClassReader.java:170)
+	at net.bytebuddy.jar.asm.ClassReader.<init>(ClassReader.java:156)
+	at net.bytebuddy.utility.OpenedClassReader.of(OpenedClassReader.java:86)
+	at net.bytebuddy.dynamic.scaffold.TypeWriter$Default$ForInlining.create(TypeWriter.java:3889)
+	at net.bytebuddy.dynamic.scaffold.TypeWriter$Default.make(TypeWriter.java:2166)
+	at net.bytebuddy.dynamic.scaffold.inline.RedefinitionDynamicTypeBuilder.make(RedefinitionDynamicTypeBuilder.java:224)
+	at net.bytebuddy.dynamic.scaffold.inline.AbstractInliningDynamicTypeBuilder.make(AbstractInliningDynamicTypeBuilder.java:123)
+	at net.bytebuddy.dynamic.DynamicType$Builder$AbstractBase.make(DynamicType.java:3659)
+	at org.mockito.internal.creation.bytebuddy.InlineBytecodeGenerator.transform(InlineBytecodeGenerator.java:391)
+	at java.instrument/java.lang.instrument.ClassFileTransformer.transform(ClassFileTransformer.java:244)
+	at java.instrument/sun.instrument.TransformerManager.transform(TransformerManager.java:188)
+	at java.instrument/sun.instrument.InstrumentationImpl.transform(InstrumentationImpl.java:610)
+	at java.instrument/sun.instrument.InstrumentationImpl.retransformClasses0(Native Method)
+	at java.instrument/sun.instrument.InstrumentationImpl.retransformClasses(InstrumentationImpl.java:225)
+	at org.mockito.internal.creation.bytebuddy.InlineBytecodeGenerator.triggerRetransformation(InlineBytecodeGenerator.java:276)
+	... 17 more
+]]></error>
+  </testcase>
+</testsuite>

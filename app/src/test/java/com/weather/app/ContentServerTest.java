@@ -1,74 +1,102 @@
 package com.weather.app;
 
-//File: ContentServerTest.java
-import org.junit.jupiter.api.*;
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import java.io.*;
+import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.file.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class ContentServerTest {
+class ContentServerTest {
 
- @Test
- public void testContentServerSendsData() throws Exception {
-     // Prepare test data file
-     String testData = "id:TEST_ID\nname:Test Station\nstate:TS";
-     Path tempFile = Files.createTempFile("test_weather_data", ".txt");
-     Files.write(tempFile, testData.getBytes());
+    private static Thread serverThread;
 
-     // Start the AggregationServer in a separate thread
-     Thread serverThread = new Thread(() -> {
-         try {
-             AggregationServer.main(new String[]{});
-         } catch (Exception e) {
-             e.printStackTrace();
-         }
-     });
-     serverThread.start();
-     Thread.sleep(1000);
+    @BeforeAll
+    static void startServer() {
+        serverThread = new Thread(() -> {
+            try {
+                AggregationServer.main(new String[] { "4568" });
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        serverThread.start();
 
-     // Start the ContentServer
-     Thread contentServerThread = new Thread(() -> {
-         try {
-             ContentServer.main(new String[]{"localhost:8080", tempFile.toAbsolutePath().toString()});
-         } catch (Exception e) {
-             e.printStackTrace();
-         }
-     });
-     contentServerThread.start();
-     contentServerThread.join();
+        // Give the server time to start
+        try {
+            Thread.sleep(2000);  // Adjust sleep time as necessary
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
 
-     // Verify data on the server as before
-     Socket socket = new Socket("localhost", 8080);
-     BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-     BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+    @Test
+    void testContentServerSendData() throws IOException {
+        String[] args = { "localhost:4568", "testWeatherData.txt" };
+        ContentServer.main(args);
 
-     out.write("GET /weather HTTP/1.1\r\n");
-     out.write("Host: localhost\r\n");
-     out.write("\r\n");
-     out.flush();
+        // Now check if the data was received by the AggregationServer
+        Socket socket = new Socket("localhost", 4568);
+        PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+        BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-     // Read response status line
-     String statusLine = in.readLine();
-     assertTrue(statusLine.contains("200"), "Response should be 200 OK");
+        // Send GET request
+        out.println("GET /weather.json HTTP/1.1");
+        out.println("Host: localhost");
+        out.println("Accept: application/json");
+        out.println("Lamport-Clock: 3");
+        out.println();
 
-     // Read headers
-     String line;
-     int responseContentLength = 0;
-     while (!(line = in.readLine()).isEmpty()) {
-         if (line.startsWith("Content-Length:")) {
-             responseContentLength = Integer.parseInt(line.split(": ")[1]);
-         }
-     }
+        // Read the response
+        String statusLine = in.readLine();
+        assertTrue(statusLine.contains("200")); // Ensure we get OK status
 
-     // Read body
-     char[] bodyChars = new char[responseContentLength];
-     in.read(bodyChars);
-     String responseBody = new String(bodyChars);
+        // Read JSON body
+        StringBuilder responseBody = new StringBuilder();
+        String line;
+        while ((line = in.readLine()) != null) {
+            responseBody.append(line);
+        }
 
-     assertTrue(responseBody.contains("\"id\":\"TEST_ID\""), "Response should contain the test data");
+        assertTrue(responseBody.toString().contains("Test Station"));
+        assertTrue(responseBody.toString().contains("Test State"));
 
-     socket.close();
-     serverThread.interrupt();
- }
+        socket.close();
+    }
+
+    @Test
+    void testContentServerInvalidFileFormat() throws IOException {
+        // Prepare an invalid file for content server
+        try (PrintWriter writer = new PrintWriter(new FileWriter("invalidWeatherData.txt"))) {
+            writer.println("invalid data");
+        }
+
+        String[] args = { "localhost:4568", "invalidWeatherData.txt" };
+        ContentServer.main(args);
+
+        // Since there's no id, the entry should be rejected
+        Socket socket = new Socket("localhost", 4568);
+        PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+        BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+
+        // Send GET request to check if no invalid data was stored
+        out.println("GET /weather.json HTTP/1.1");
+        out.println("Host: localhost");
+        out.println("Accept: application/json");
+        out.println("Lamport-Clock: 3");
+        out.println();
+
+        // Read the response
+        StringBuilder responseBody = new StringBuilder();
+        String line;
+        while ((line = in.readLine()) != null) {
+            responseBody.append(line);
+        }
+
+        // Ensure the invalid data wasn't stored
+        assertFalse(responseBody.toString().contains("invalid data"));
+
+        socket.close();
+    }
+   
 }

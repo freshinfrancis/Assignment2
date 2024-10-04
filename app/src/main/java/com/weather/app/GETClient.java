@@ -120,14 +120,54 @@ public class GETClient {
         }
     }
 
-    private static void displayWeatherData(String jsonData) {
-    	Gson gson = new Gson();
-        
-        // Parse JSON data
-    	jsonData = jsonData.replace("{", "").replace("}", "").replace("\"", "");
+    public static void displayWeatherData(String jsonData) {
+    	jsonData = jsonData.trim();
+    	System.out.println("-----------------------------------");
+    	
+        // Check if the response is empty
+        if (jsonData.isEmpty()) {
+            System.out.println("No weather data available.");
+            return;
+        }
 
-        System.out.println("Received Weather Data:");
-        
-        System.out.println(jsonData);
+        // Handle JSON arrays (if the data is wrapped in an array)
+        if (jsonData.startsWith("[") && jsonData.endsWith("]")) {
+            jsonData = jsonData.substring(1, jsonData.length() - 1).trim();  // Remove the array brackets
+        }
+
+        // Check if the JSON data is still empty after trimming
+        if (jsonData.isEmpty()) {
+            System.out.println("No weather data available.");
+            return;
+        }
+
+        // Split the JSON objects if there are multiple weather data entries
+        String[] dataObjects = jsonData.split("\\},\\{");
+
+        // Loop through each weather data object
+        for (String dataObject : dataObjects) {
+            // Clean up any remaining curly braces
+            dataObject = dataObject.replaceAll("[\\{\\}]", "").trim();
+
+            // Check if the data object is empty or malformed
+            if (dataObject.isEmpty()) {
+                continue;  // Skip empty entries
+            }
+
+            // Split the attributes of the weather data
+            String[] attributes = dataObject.split(",");
+            for (String attribute : attributes) {
+                String[] keyValue = attribute.split(":", 2);
+
+                // Ensure the key-value pair is valid (i.e., has both a key and a value)
+                if (keyValue.length < 2) {
+                    continue;  // Skip invalid key-value pairs
+                }
+
+                String key = keyValue[0].replaceAll("\"", "").trim();
+                String value = keyValue[1].replaceAll("\"", "").trim();
+                System.out.println(key + ": " + value);
+            }
+        }
     }
 }

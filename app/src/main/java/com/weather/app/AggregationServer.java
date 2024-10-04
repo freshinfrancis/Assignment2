@@ -96,7 +96,7 @@ public class AggregationServer {
         }
     }
 
-    private static void handlePutRequest(BufferedReader in, PrintWriter out, String contentServer, Map<String, String> headers) throws IOException {
+    public static void handlePutRequest(BufferedReader in, PrintWriter out, String contentServer, Map<String, String> headers) throws IOException {
         lamportClock.tick();
 
         int contentLength = Integer.parseInt(headers.getOrDefault("Content-Length", "0"));
@@ -163,10 +163,13 @@ public class AggregationServer {
         }
     }
 
-    private static void handleGetRequest(PrintWriter out, Map<String, String> headers) throws IOException {
+    public static void handleGetRequest(PrintWriter out, Map<String, String> headers) throws IOException {
         lamportClock.tick();
 
-        String jsonResponse = convertToJson(weatherData);
+        //String jsonResponse = convertToJson(weatherData);
+        
+     // If no weather data, return an empty JSON array
+        String jsonResponse = weatherData.isEmpty() ? "[]" : convertToJson(weatherData);
 
         // Send headers
         out.println("HTTP/1.1 200 OK");
@@ -180,7 +183,7 @@ public class AggregationServer {
         out.flush();
     }
 
-    private static void writeToTempFile(Map<String, JsonObject> data) throws IOException {
+    public static void writeToTempFile(Map<String, JsonObject> data) throws IOException {
         try (FileWriter fileWriter = new FileWriter(TEMP_FILE)) {
             fileWriter.write(new Gson().toJson(data.values()));
         }

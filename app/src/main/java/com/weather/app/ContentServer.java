@@ -47,7 +47,7 @@ public class ContentServer {
         }
     }
 
-    private static String convertFileToJson(String filePath) throws IOException {
+    public static String convertFileToJson(String filePath) throws IOException {
         Map<String, String> dataMap = new HashMap<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
@@ -82,7 +82,7 @@ public class ContentServer {
         return jsonBuilder.toString();
     }
 
-    private static void sendDataToServer(String jsonData) throws IOException {
+    public static void sendDataToServer(String jsonData) throws IOException {
         lamportClock.tick(); // Increment Lamport clock before sending
 
         try (Socket socket = new Socket(serverAddress, serverPort);

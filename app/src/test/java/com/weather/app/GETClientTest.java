@@ -1,49 +1,82 @@
 package com.weather.app;
 
-//File: GETClientTest.java
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Test;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.PrintStream;
+import java.net.ServerSocket;
+import java.net.Socket;
+
 import static org.junit.jupiter.api.Assertions.*;
-import java.io.*;
 
-public class GETClientTest {
+class GETClientTest {
 
- @Test
- public void testGETClientReceivesData() throws Exception {
-     // Start the AggregationServer and ContentServer as before
-     Thread serverThread = new Thread(() -> {
-         try {
-             AggregationServer.main(new String[]{});
-         } catch (Exception e) {
-             e.printStackTrace();
-         }
-     });
-     serverThread.start();
-     Thread.sleep(1000);
+    @Test
+    void testGetClientReceivesData() throws IOException {
+        // Test case for retrieving data from AggregationServer
+        String[] args = { "localhost:4568" };
+        GETClient.main(args);
 
-     Thread contentServerThread = new Thread(() -> {
-         try {
-             ContentServer.main(new String[]{"localhost:8080", "txt.txt"});
-         } catch (Exception e) {
-             e.printStackTrace();
-         }
-     });
-     contentServerThread.start();
-     contentServerThread.join();
+    }
+    
+    @Test
+    public void testGETClientHandlesValidServerResponse() throws Exception {
+        // Start a mock server that will respond with JSON data
+        Thread mockServerThread = new Thread(() -> {
+            try (ServerSocket serverSocket = new ServerSocket(8081)) {
+                Socket socket = serverSocket.accept();
+                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 
-     // Capture the output of GETClient
-     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-     PrintStream originalOut = System.out;
-     System.setOut(new PrintStream(baos));
+                // Read the request (you can add more processing if needed)
+                while (!in.readLine().isEmpty()) {
+                    // Just read the request
+                }
 
-     // Run GETClient
-     GETClient.main(new String[]{"localhost:8080"});
+                // Mock a 200 OK response with a JSON body
+                String jsonResponse = "[{\"id\":\"IDS60901\",\"name\":\"Adelaide\",\"state\":\"SA\",\"air_temp\":\"13.3\"}]";
+                out.write("HTTP/1.1 200 OK\r\n");
+                out.write("Content-Type: application/json\r\n");
+                out.write("Content-Length: " + jsonResponse.length() + "\r\n");
+                out.write("\r\n");
+                out.write(jsonResponse);
+                out.flush();
 
-     // Restore original output
-     System.setOut(originalOut);
+                socket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
 
-     String output = baos.toString();
-     assertTrue(output.contains("id: TEST_ID"), "Output should contain the test data");
+        // Start the mock server
+        mockServerThread.start();
+        Thread.sleep(500); // Wait for the mock server to start
 
-     serverThread.interrupt();
- }
+        // Capture the output of the GETClient
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        PrintStream originalOut = System.out;
+        System.setOut(new PrintStream(outputStream));
+
+        // Run the GETClient and connect to the mock server
+        String[] args = { "localhost:8081" };
+        GETClient.main(args);
+
+        // Restore the original output
+        System.setOut(originalOut);
+
+        // Verify the client output
+        String output = outputStream.toString();
+        assertTrue(output.contains("id: IDS60901"));
+        assertTrue(output.contains("name: Adelaide"));
+        assertTrue(output.contains("state: SA"));
+        assertTrue(output.contains("air_temp: 13.3"));
+
+        // Stop the mock server thread
+        mockServerThread.interrupt();
+    }
 }
