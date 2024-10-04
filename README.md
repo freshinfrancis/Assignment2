@@ -36,16 +36,7 @@
 ## Running the Project using Command Line
 
 Directory Structure
-├── src
-|__ main
-│   └── com
-│       └── weather
-│           └── app
-│               ├── AggregationServer.java
-│               ├── ContentServer.java
-│               └── GETClient.java
-|	              |__ LamportClock.java
-
+src/main/com/weather/app/
 
 # Building the Project
 1.	Navigate to the root directory of the project.
@@ -57,7 +48,7 @@ Directory Structure
 1. Start the Aggregation Server
 - Open a terminal and run the following command to start the Aggregation Server:
 
-```java -cp bin com.weather.app.AggregationServer <port>
+`java -cp bin com.weather.app.AggregationServer <port>`
 
 Usage:
 ```java -cp bin com.weather.app.AggregationServer 4567
